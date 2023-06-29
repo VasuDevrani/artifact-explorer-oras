@@ -6,9 +6,7 @@ import (
 )
 
 func main() {
-	var ser s.Server
-
-	ser.Init("3000", "../web", "")
+	ser := s.Init("3000", "../web", ".html")
 
 	err := ser.Run()
 	if(err != nil) {
