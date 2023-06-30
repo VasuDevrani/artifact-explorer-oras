@@ -14,6 +14,7 @@ import (
 )
 
 type Result struct {
+	Artifact  string
 	MediaType string
 	Digest    string
 	Manifests interface{}
@@ -21,13 +22,15 @@ type Result struct {
 	Layers    interface{}
 }
 
-func GetManifest2() fiber.Handler {
+func GetManifest() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		q := c.Queries()
 		registryName := q["registry"]
 		name := q["name"]
 
-		repo, err := remote.NewRepository(registryName + name)
+		artifact := registryName + name
+
+		repo, err := remote.NewRepository(artifact)
 		if err != nil {
 			return c.JSON(err)
 		}
@@ -38,8 +41,10 @@ func GetManifest2() fiber.Handler {
 		_, foundDigest := q["digest"]
 		if(foundDigest) {
 			descriptor, err = repo.Resolve(ctx, q["digest"])
+			artifact = artifact + "@" + q["digest"]
 		} else {
 			descriptor, err = repo.Resolve(ctx, q["tag"])
+			artifact = artifact + ":" + q["tag"]
 		}
 
 		if err != nil {
@@ -66,6 +71,7 @@ func GetManifest2() fiber.Handler {
 		}
 
 		result := Result{
+			Artifact:  artifact,
 			Manifests: data["manifests"],
 			Configs:   data["configs"],
 			Layers:    data["layers"],

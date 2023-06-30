@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  /* colors */
+  --primary-color: #4053b8;
+  --primary-color-light: #007aff;
+  --primary-gradient: linear-gradient(101deg, #4051b5 15.63%, #4285f4 90.96%);
+  --secondary-color-light: rgba(208, 205, 205, 0.82);
+  --secondary-color: #303846;
+  --secondary-color-dark: rgba(0, 0, 0, 0.39);
+  --text-light: #c9c7c7;
+  --text-dark: #2e303e;
+  --text-link: #4285f4;
+
+  /* widths */
+  --breakpoint-mobile: 576px;
+  --breakpoint-tablet: 768px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+a {
+  text-decoration: none;
+  color: var(--secondary-color-light);
+}
+button {
+  border: none;
+  border-radius: 12px;
+  color: var(--text-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  transition: all 300ms ease;
+}
+button:active {
+  transform: scale(0.94);
+}
+
+/* navbar */
+nav {
+  background: var(--primary-gradient);
+  padding: 13px 20px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+nav ul {
+  list-style: none;
+  display: flex;
+  flex-direction: row;
+  gap: 30px;
+  align-items: center;
+  margin-bottom: 0;
+  justify-content: space-between;
+}
+nav ul li a:hover {
+  color: var(--text-light);
+  cursor: pointer;
+}
+/* footer */
+footer {
+  background-color: var(--secondary-color);
+  height: 500px;
+}

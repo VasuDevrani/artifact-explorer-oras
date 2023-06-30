@@ -1,0 +1,63 @@
+@import url("index.css");
+
+/* hero */
+.hero {
+  background: url("../images/homeHeroBg.svg");
+  height: 450px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 10px;
+  position: relative;
+}
+.hero h1 {
+  margin-top: 140px;
+  color: var(--primary-color-light);
+  font-weight: 700;
+  font-size: 48px;
+  z-index: 10;
+}
+.hero p {
+  color: var(--text-light);
+  margin-top: -15px;
+}
+.hero button {
+  background-color: var(--secondary-color);
+  padding: 15px 25px;
+  font-size: 18px;
+  gap: 12px;
+  margin-top: 2rem;
+}
+.hero button img {
+  height: 25px;
+}
+/* main body */
+.main .rgs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8rem;
+  flex-wrap: wrap;
+  margin: 5rem;
+}
+.main .rgs img {
+  width: 80px;
+}
+.main .about,
+.main .features {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 5rem;
+}
+.main .about h1 {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+.main .features h1 {
+  color: var(--primary-color);
+  font-weight: 600;
+}
