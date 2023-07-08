@@ -91,6 +91,7 @@
       const tag = document.querySelector("#digestortag");
 
       const artifact = document.querySelector("#content_area");
+      const rows = document.querySelectorAll("#table_digest");
 
       function onSubmit() {
         const URL =
@@ -101,7 +102,7 @@
       }
 
       function getContentsByDigest(item) {
-        const URL = `/api/artifact?registry=${reg.value}&name=${repo.value}&digest=${JSON.parse(item).Digest}`;
+        const URL = `/api/artifact?registry=${reg.value}&name=${repo.value}&digest=${item.Digest}`;
         console.log(URL);
         getArtifactContents(URL);
       }
@@ -110,13 +111,13 @@
         let records = "";
         manifests.forEach((item, ind) => {
           records += `
-              <tr>
-                <td>${item.mediaType}</td>
-                <td>${item.size}</td>
-                <td onclick="getContentsByDigest(${JSON.stringify({
-                  Digest: item.digest
-                })})" id="table_digest">${item.digest}</td>
-              </tr>
+          <tr>
+        <td>${item.mediaType}</td>
+        <td>${item.size}</td>
+        <td id="table_digest" onclick="getContentsByDigest(${JSON.stringify({
+          Digest: item.digest,
+        })})">${item.digest}</td>
+      </tr>
               `;
         });
         const table = `

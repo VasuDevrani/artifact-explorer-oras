@@ -2,13 +2,6 @@ package server
 
 import "github.com/gofiber/fiber/v2"
 
-type FormData struct {
-	Registry string
-	Name     string
-	Digest   string
-	Tag 	 string
-}
-
 func AppRouter(app fiber.Router) {
 	app.Get("/home", func(c *fiber.Ctx) error {
         return c.Render("home", nil)
@@ -18,5 +11,11 @@ func AppRouter(app fiber.Router) {
         return c.Render("artifact", nil)
     })
 
-	app.Get("/api/artifact", GetManifest())
+	app.Get("/api/tags", Tags())
+
+	app.Get("/api/referrers", Referrers())
+
+	app.Get("/api/blob", BlobContent())
+
+	app.Get("/api/artifact", Manifest())
 }
