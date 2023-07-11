@@ -9,7 +9,7 @@
       <div class="hero_about"></div>
       <div class="form">
         <h1>Enter artifact details</h1>
-        <div class="ui fluid selection dropdown">
+        <div class="ui fluid selection dropdown mb-3">
           <input type="hidden" name="registry" />
           <i class="dropdown icon"></i>
           <div class="default text">Select registry</div>
@@ -19,14 +19,21 @@
                 class="ui mini avatar image"
                 src="./static/images/registryImages/image1.svg"
               />
-              docker.io/
+              docker.io
             </div>
             <div class="item" data-value="gcr.io/">
               <img
                 class="ui mini avatar image"
                 src="./static/images/registryImages/image2.svg"
               />
-              gcr.io/
+              gcr.io
+            </div>
+            <div class="item" data-value="zot.io/">
+              <img
+                class="ui mini avatar image"
+                src="./static/images/registryImages/image4.svg"
+              />
+              zot.io
             </div>
           </div>
         </div>
@@ -41,17 +48,19 @@
           <label for="floatingInput">Repository name</label>
         </div>
 
-        <div class="ui right labeled input">
-          <input type="text" placeholder="Enter tag or digest" name="tag" />
-          <div class="ui dropdown label">
-            <div class="text" id="digestortag">Tag</div>
-            <i class="dropdown icon"></i>
-            <div class="menu">
-              <div class="item">Tag</div>
-              <div class="item">Digest</div>
-            </div>
-          </div>
+        <div class="form-floating mb-3" id="digestortag">
+          <input
+            type="text"
+            class="form-control"
+            id="floatingInput"
+            placeholder="library/nginx"
+            oninput="updateTagList()"
+            onfocus="listTags()"
+          />
+          <label for="floatingInput">Tag or Digest</label>
+          <div class="tagListDropdown hide"></div>
         </div>
+
         <a href="#content_area">
           <button onclick="onSubmit()">
             <div class="icon">
@@ -66,114 +75,49 @@
     <!-- artifact content section -->
     <div id="content_area">
       <h1>Artifact</h1>
-      <div class="ui labeled input">
-        <div class="ui label">Content-Digest:</div>
-        <input type="text" placeholder="not available" disabled />
+      <div class="metaData">
+        <div class="ui labeled input">
+          <div class="ui label">Artifact Name:</div>
+          <input type="text" placeholder="not available" disabled />
+        </div>
+        <div class="ui labeled input">
+          <div class="ui label">Content-Digest:</div>
+          <input type="text" placeholder="not available" disabled />
+        </div>
+        <div class="ui labeled input">
+          <div class="ui label">MediaType:</div>
+          <input type="text" placeholder="not available" disabled />
+        </div>
       </div>
-      <div class="ui labeled input">
-        <div class="ui label">Content-Length:</div>
-        <input type="text" placeholder="not available" disabled />
-      </div>
-      <div class="ui labeled input">
-        <div class="ui label">MediaType:</div>
-        <input type="text" placeholder="not available" disabled />
+
+      <div class="main">
+        <div class="leftSideBar">
+          <ul>
+            <li class="active" onclick="alterRightSide('manifestBlock')">
+              Contents
+            </li>
+            <li onclick="alterRightSide('referrerBlock')">Referrers</li>
+            <li onclick="alterRightSide('blobBlock')">Blobs</li>
+            <li onclick="alterRightSide('othersBlock')">Others</li>
+          </ul>
+        </div>
+        <div class="rightContent">
+          <div class="spinner spinner-border text-info" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <div id="manifestBlock" class="contentBlock active">
+            Nothing to show
+          </div>
+          <div id="referrerBlock" class="contentBlock">Nothing to show</div>
+          <div id="blobBlock" class="contentBlock">Nothing to show</div>
+          <div id="othersBlock" class="contentBlock">Nothing to show</div>
+        </div>
       </div>
     </div>
 
     {{ template "footer" }}
     <script>
       $(".ui.dropdown").dropdown();
-      const reg = document.querySelector(
-        'input[type="hidden"][name="registry"]'
-      );
-      const repo = document.querySelector("#floatingInput");
-      const tagValue = document.querySelector('input[name="tag"]');
-      const tag = document.querySelector("#digestortag");
-
-      const artifact = document.querySelector("#content_area");
-      const rows = document.querySelectorAll("#table_digest");
-
-      function onSubmit() {
-        const URL =
-          tag.innerHTML === "Tag"
-            ? `/api/artifact?registry=${reg.value}&name=${repo.value}&tag=${tagValue.value}`
-            : `/api/artifact?registry=${reg.value}&name=${repo.value}&digest=${tagValue.value}`;
-        getArtifactContents(URL);
-      }
-
-      function getContentsByDigest(item) {
-        const URL = `/api/artifact?registry=${reg.value}&name=${repo.value}&digest=${item.Digest}`;
-        console.log(URL);
-        getArtifactContents(URL);
-      }
-
-      function getManifestTable(manifests) {
-        let records = "";
-        manifests.forEach((item, ind) => {
-          records += `
-          <tr>
-        <td>${item.mediaType}</td>
-        <td>${item.size}</td>
-        <td id="table_digest" onclick="getContentsByDigest(${JSON.stringify({
-          Digest: item.digest,
-        })})">${item.digest}</td>
-      </tr>
-              `;
-        });
-        const table = `
-        <table class="ui fixed single line celled table">
-        <thead>
-        <tr>
-          <th scope="col">Mediatype</th>
-          <th scope="col">Size</th>
-          <th scope="col">Digest</th>
-          <th scope="col">Platform</th>
-        </tr>
-        </thead>
-        ${records}
-        </table>`;
-
-        return table;
-      }
-
-      function getArtifactContents(URL) {
-        artifact.innerHTML = `
-        <div class="spinner-border text-info" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        `;
-
-        fetch(URL)
-          .then((res) => res.json())
-          .then((data) => {
-            // console.log(data);
-            const manifests = data.Manifests;
-
-            artifact.innerHTML = `
-          <h1>Artifact</h1>
-          <div class="ui labeled input">
-            <div class="ui label">Content-Digest:</div>
-            <input type="text" placeholder="not available" value=${
-              data.Artifact
-            } disabled />
-          </div>
-          <div class="ui labeled input">
-            <div class="ui label">Content-Length:</div>
-            <input type="text" placeholder="not available" value=${
-              data.ContentLength
-            } disabled />
-          </div>
-          <div class="ui labeled input">
-            <div class="ui label">MediaType:</div>
-            <input type="text" placeholder="not available" value=${
-              data.MediaType
-            } disabled />
-          </div>
-          ${manifests ? getManifestTable(manifests) : ""}
-          `;
-          })
-          .catch((err) => console.log(err));
-      }
     </script>
   </body>
 </html>

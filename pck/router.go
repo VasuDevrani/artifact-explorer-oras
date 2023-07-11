@@ -3,7 +3,7 @@ package server
 import "github.com/gofiber/fiber/v2"
 
 func AppRouter(app fiber.Router) {
-	app.Get("/home", func(c *fiber.Ctx) error {
+	app.Get("/", func(c *fiber.Ctx) error {
         return c.Render("home", nil)
     })
 
@@ -18,4 +18,8 @@ func AppRouter(app fiber.Router) {
 	app.Get("/api/blob", BlobContent())
 
 	app.Get("/api/artifact", Manifest())
+
+	app.Get("*", func(c *fiber.Ctx) error {
+        return c.Render("404", nil)
+    })
 }

@@ -48,6 +48,32 @@
   margin-top: 3rem;
   color: #ffff;
 }
+
+.hero .form #digestortag {
+  position: relative;
+}
+
+.hero .form #digestortag .tagListDropdown {
+  position: absolute;
+  top: 62px;
+  border-radius: 10px;
+  width: 100%;
+  z-index: 10;
+  height: 200px;
+  background: #ffff;
+  box-shadow: 2px 7px 10px 0px rgba(0, 0, 0, 0.31);
+  flex-direction: column;
+  overflow: auto;
+}
+
+.hero .form #digestortag .tagListDropdown p {
+  cursor: pointer;
+  padding: 8px 15px;
+}
+.hero .form #digestortag .tagListDropdown p:hover {
+  background-color: var(--text-light);
+}
+
 .form-control {
   font-size: medium;
 }
@@ -57,12 +83,19 @@
   height: auto;
   /* line-height: normal; */
 }
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown),
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown) {
+  padding-top: 2rem;
+  padding-bottom: 0.625rem;
+}
 /* content area */
 #content_area {
   display: flex;
   justify-content: center;
   flex-direction: column;
-  max-width: 50%;
+  max-width: 80%;
   margin: auto;
   gap: 1rem;
   margin: 7rem auto;
@@ -70,4 +103,125 @@
 #content_area table #table_digest {
   color: var(--primary-color-light);
   cursor: pointer;
+}
+#content_area .metaData {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 70%;
+}
+#content_area table #table_digest {
+  color: var(--primary-color-light);
+  cursor: pointer;
+}
+
+#content_area .main {
+  display: flex;
+  flex-direction: row;
+  margin-top: 2rem;
+  gap: 3rem;
+}
+#content_area .main .leftSideBar {
+  flex: 0.25;
+  padding: 20px 0px;
+  border-radius: 10px;
+  box-shadow: 4px 5px 19px -7px rgba(0, 0, 0, 0.31);
+  min-height: 420px;
+}
+#content_area .main .leftSideBar ul {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+}
+#content_area .main .leftSideBar ul li {
+  min-width: 100px;
+  padding: 15px;
+  border-bottom: 1px solid var(--secondary-color-light);
+  border-right: 1px solid var(--secondary-color-light);
+  border-top: 1px solid var(--secondary-color-light);
+  transition: box-shadow 0.3s;
+}
+#content_area .main .leftSideBar ul li.active {
+  border-right: none;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  /* box-shadow: 0px 5px 0px 0px rgba(0, 0, 0, 0.31), 0px -5px 0px 0px rgba(0, 0, 0, 0.31); */
+}
+#content_area .main .leftSideBar ul li:hover {
+  /* background-color: var(--text-light); */
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+#content_area .main .rightContent {
+  flex: 0.8;
+}
+#content_area .main .rightContent .contentBlock {
+  display: none;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+#content_area .main .rightContent .contentBlock.active {
+  display: flex;
+  opacity: 1;
+}
+#content_area .main .rightContent .spinner {
+  display: none;
+}
+#content_area .main .rightContent .loader {
+  display: block;
+}
+#content_area .metaData .ui.input > input {
+  opacity: 0.9;
+  color: var(--text-dark) !important;
+}
+#content_area .main .rightContent #manifestBlock table tr #digest {
+  color: var(--text-link);
+  cursor: pointer;
+  position: relative;
+}
+#content_area .main .rightContent #manifestBlock table tr #digest div {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#content_area .main .rightContent #manifestBlock table tr #digest:hover div {
+  width: 92%;
+}
+#content_area .main .rightContent #manifestBlock table tr td #copyIcon {
+  width: 13px;
+  position: absolute;
+  top: 18px;
+  right: 5%;
+  z-index: 10;
+  background: white;
+  visibility: hidden;
+}
+#content_area
+  .main
+  .rightContent
+  #manifestBlock
+  table
+  tr
+  #digest:hover
+  #copyIcon {
+  visibility: visible;
+}
+#content_area .main .rightContent #manifestBlock #manifestTable .view-item {
+  display: none;
+  margin-top: 1rem;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+#content_area .main .rightContent #manifestBlock #manifestTable #jsonV {
+  max-height: 70vh;
+  overflow: auto;
+  width: 100%;
+}
+#content_area
+  .main
+  .rightContent
+  #manifestBlock
+  #manifestTable
+  .view-item.active {
+  display: block;
+  opacity: 1;
 }
