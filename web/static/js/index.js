@@ -94,6 +94,14 @@ function alterRightSide(contentId) {
     contentBlocks[i].classList.remove("active");
   }
   selectedContent.classList.add("active");
+  if(contentId === "referrerBlock" && !rsb.isReferrersPrepared) {
+    if (!reg.value || !repo.value || !tag.value) return;
+    ar.setReferrers({
+      registry: reg.value,
+      repo: repo.value,
+      tag: tag.value,
+    })
+  }
 }
 // ends
 
@@ -152,13 +160,13 @@ class RightSideBlock {
     if (this.isManifestPrepared || (!ar.Manifests && !ar.Layers && !ar.Configs))
       return;
 
+    const loader = document.querySelector(
+      "#content_area .main .rightContent .spinner-border"
+    );
     const b1 = document.querySelector(
       "#content_area .main .rightContent #manifestBlock"
     );
     b1.innerHTML = "";
-    const loader = document.querySelector(
-      "#content_area .main .rightContent .spinner-border"
-    );
 
     loader.classList.remove("spinner");
     loader.classList.add("loader");
@@ -253,6 +261,22 @@ class RightSideBlock {
   prepareReferrersBlock() {
     if (this.isReferrersPrepared || !ar.Referrers) return;
 
+    const loader = document.querySelector(
+      "#content_area .main .rightContent .spinner-border"
+    );
+    const b1 = document.querySelector(
+      "#content_area .main .rightContent #referrerBlock"
+    );
+    b1.innerHTML = "";
+
+    loader.classList.remove("spinner");
+    loader.classList.add("loader");
+    window.setTimeout(() => {
+      loader.classList.remove("loader");
+      loader.classList.add("spinner");
+    
+      $("#content_area .main .rightContent #referrerBlock").bstreeview({ data: ar.Referrers });
+    }, 500);
     // create a tree from recursive object
     // set into the DOM element
   }
@@ -308,14 +332,15 @@ class Artifact {
   }
 
   setReferrers(artifact) {
+    console.log(artifact)
     fetch(
-      `/api/referrers?registry=${artifact.registry}&name=${artifact.repo}&${
-        !tagList.includes(artifact.tag) ? "digest" : "tag"
-      }=${artifact.tag}`
+      `/api/referrers?registry=${artifact.registry}&name=${artifact.repo}&tag=${artifact.tag}`
     )
       .then((res) => res.json())
       .then((data) => {
         this.Referrers = data;
+        rsb.prepareReferrersBlock();
+        // rsb.isReferrersPrepared = true;
         return null;
       })
       .catch((err) => {
@@ -342,5 +367,9 @@ document.addEventListener("click", (event) => {
     tagListDropdown.classList.remove("show");
     tagListDropdown.classList.add("hide");
   }
+});
+document.addEventListener('DOMContentLoaded', function() {
+  const urlParams = new URLSearchParams(window.location.search);
+  console.log(urlParams);
 });
 // ends

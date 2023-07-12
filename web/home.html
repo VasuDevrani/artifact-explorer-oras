@@ -5,16 +5,19 @@
     {{ template "navbar" }}
     <!-- hero section -->
     <div class="hero">
-      <h1>ORAS Artifact Explorer</h1>
-      <p>
-        Explore the content of OCI artifacts from any public repository at ease
-        with ORAS under the hood
-      </p>
-      <a href="/artifact">
+      <div class="heroHead">
+        <h1>ORAS Artifact Explorer</h1>
+        <p>
+          Explore the content of OCI artifacts from any public repository at
+          ease with ORAS under the hood
+        </p>
+      </div>
+      <div class="form">
+        {{ template "form" }}
         <button>
           Explore now <img src="./static/images/rightArrow.svg" alt="" />
         </button>
-      </a>
+      </div>
     </div>
     <!-- main body -->
     <div class="main">
@@ -33,5 +36,8 @@
       </div>
     </div>
     {{template "footer"}}
+    <script>
+      $(".ui.dropdown").dropdown();
+    </script>
   </body>
 </html>
