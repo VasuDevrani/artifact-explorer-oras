@@ -23,7 +23,7 @@ func Init(port string, staticPath string, templatePath string) Server{
         Views: engine,
     })
 
-	app.Static("/static", "./web/static")
+	app.Static("/static", "../web/static")
 
 	s.port = port
 	s.staticPath = staticPath

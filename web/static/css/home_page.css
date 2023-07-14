@@ -22,7 +22,7 @@
   font-size: 66px;
   z-index: 10;
 }
-.hero p {
+.hero .heroHead p {
   color: var(--text-light);
   font-size: 18px;
   margin-top: -15px;
@@ -34,9 +34,98 @@
   flex-direction: column;
   justify-content: center;
 }
-.hero .form .ui.default.dropdown:not(.button) > .text,
+.artifactInputForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: center;
+}
+.artifactInputForm .ui.default.dropdown:not(.button) > .text,
 .ui.dropdown:not(.button) > .default.text {
   color: var(--text-dark);
+}
+.artifactInputForm #digestortag {
+  position: relative;
+}
+.artifactInputForm #registry {
+  position: relative;
+}
+.tagListDropdown, .registryDropdown {
+  position: absolute;
+  top: 70px;
+  border-radius: 10px;
+  width: 100%;
+  z-index: 10;
+  height: 165px;
+  background: #ffff;
+  box-shadow: 2px 7px 10px 0px rgba(0, 0, 0, 0.31);
+  flex-direction: column;
+  overflow: auto;
+}
+.tagListDropdown .items {
+  cursor: pointer;
+  padding: 8px 15px;
+}
+.tagListDropdown p {
+  padding: 5px 15px;
+  cursor: pointer;
+}
+.tagListDropdown p:hover {
+  background-color: var(--text-light);
+}
+.tagListDropdown .error, .tagListDropdown .info {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  gap: 1rem;
+  margin: auto;
+  flex-direction: column;
+}
+.tagListDropdown .error img, .tagListDropdown .info img {
+  width: 32px;
+}
+.registryDropdown .items {
+  cursor: pointer;
+  padding: 8px 15px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+.registryDropdown .items img {
+  width: 20px;
+}
+.registryDropdown .items:hover {
+  background-color: var(--text-light);
+}
+.artifactInputForm .form-control {
+  font-size: medium;
+}
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown),
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown) {
+  padding-top: 3rem;
+  padding-bottom: 1.625rem;
+}
+.artifactInputForm .form-floating > label {
+  padding: 1.4rem 0.75rem;
+}
+.form-floating > .form-control,
+.form-floating > .form-control-plaintext {
+  padding: 2.3rem 0.75rem;
+}
+.artifactInputForm .ui.selection.dropdown > .delete.icon,
+.ui.selection.dropdown > .dropdown.icon,
+.ui.selection.dropdown > .search.icon {
+  top: 1.45rem;
+}
+.artifactInputForm .ui.selection.dropdown {
+  line-height: 2em;
+}
+.artifactInputForm .ui.dropdown>.text {
+  display: flex;
+  align-items: center;
 }
 .hero button {
   background-color: var(--secondary-color);
@@ -47,7 +136,14 @@
   margin-top: 2rem;
 }
 .hero button img {
-  height: 25px;
+  width: 35px;
+}
+.tagListDropdown .skeletonLoader,
+.registryDropdown .skeletonLoader {
+  width: 95%;
+  transform: translateX(10px);
+  margin: 10px 0px;
+  height: 50px;
 }
 /* main body */
 .main .rgs {
@@ -67,12 +163,21 @@
   align-items: center;
   justify-content: center;
   margin: 5rem;
+  flex-direction: column;
+  text-align: center;
+  gap: 2rem;
 }
 .main .about h1 {
   color: var(--primary-color);
   font-weight: 600;
+  font-size: 35px;
+}
+.main .about p {
+  font-size: 17px;
+  width: 75%;
 }
 .main .features h1 {
   color: var(--primary-color);
   font-weight: 600;
+  font-size: 35px;
 }

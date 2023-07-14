@@ -1,60 +1,40 @@
 {{ define "form" }}
-<div class="ui fluid selection dropdown mb-3">
-  <input type="hidden" name="registry" />
-  <i class="dropdown icon"></i>
-  <div class="default text">Select registry</div>
-  <div class="menu">
-    <div class="item" data-value="docker.io/">
-      <img
-        class="ui mini avatar image"
-        src="./static/images/registryImages/image1.svg"
-      />
-      docker.io
-    </div>
-    <div class="item" data-value="gcr.io/">
-      <img
-        class="ui mini avatar image"
-        src="./static/images/registryImages/image2.svg"
-      />
-      gcr.io
-    </div>
-    <div class="item" data-value="zot.io/">
-      <img
-        class="ui mini avatar image"
-        src="./static/images/registryImages/image4.svg"
-      />
-      zot.io
-    </div>
-    <div class="item" data-value="ghcr.io/">
-        <img
-          class="ui mini avatar image"
-          src="./static/images/registryImages/image4.svg"
-        />
-        ghcr.io
-      </div>
+<div class="artifactInputForm">
+  <div class="form-floating mb-3" id="registry">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="library/nginx"
+      oninput="updateRegList()"
+      onfocus="showRegList()"
+      onclick="showRegList()"
+    />
+    <label for="floatingInput">Registry</label>
+    <div class="registryDropdown hide"></div>
   </div>
-</div>
 
-<div class="form-floating mb-3">
-  <input
-    type="text"
-    class="form-control"
-    id="floatingInput"
-    placeholder="library/nginx"
-  />
-  <label for="floatingInput">Repository name</label>
-</div>
+  <div class="form-floating mb-3" id="repository">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="repository"
+    />
+    <label for="floatingInput">Repository</label>
+  </div>
 
-<div class="form-floating mb-3" id="digestortag">
-  <input
-    type="text"
-    class="form-control"
-    id="floatingInput"
-    placeholder="library/nginx"
-    oninput="updateTagList()"
-    onfocus="listTags()"
-  />
-  <label for="floatingInput">Tag or Digest</label>
-  <div class="tagListDropdown hide"></div>
+  <div class="form-floating mb-3" id="digestortag">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="tag or digest"
+      oninput="updateTagList()"
+      onfocus="listTags()"
+    />
+    <label for="floatingInput">Tag or Digest</label>
+    <div class="tagListDropdown hide"></div>
+  </div>
 </div>
 {{ end }}

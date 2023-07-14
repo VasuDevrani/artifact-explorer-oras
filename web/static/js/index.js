@@ -1,30 +1,96 @@
-const reg = document.querySelector('input[type="hidden"][name="registry"]');
-const repo = document.querySelector("#floatingInput");
+const reg = document.querySelector(".artifactInputForm #registry input");
+const repo = document.querySelector(".artifactInputForm #repository input");
 const artifact = document.querySelector("#content_area");
 const rows = document.querySelectorAll("#table_digest");
-const tag = document.querySelector("#digestortag input");
-const tagListDropdown = document.querySelector(".tagListDropdown");
 
 // function calls
-function onSubmit() {
+function onSubmit(currentPage) {
   if (!reg.value || !repo.value || !tag.value) return;
-  const err = ar.setContents({
-    registry: reg.value,
-    repo: repo.value,
-    tag: tag.value,
-  });
-  alterRightSide("manifestBlock");
+  if (currentPage === "home") {
+    window.location.href = `/artifact?image=${reg.value}/${repo.value}${
+      !tagList || !tagList.includes(tag.value) ? "@" : ":"
+    }${tag.value}`;
+  } else if (currentPage === "artifact") {
+    const err = ar.setContents({
+      registry: `${reg.value}/`,
+      repo: repo.value,
+      tag: tag.value,
+    });
+    alterRightSide("manifestBlock");
+  }
+}
+// ends
+
+// registry list dropdown javascript
+const regList = [
+  {
+    name: "docker.io",
+    image: "./static/images/registryImages/image1.svg",
+  },
+  {
+    name: "gcr.io",
+    image: "./static/images/registryImages/image2.svg",
+  },
+  {
+    name: "zot.io",
+    image: "./static/images/registryImages/image4.svg",
+  },
+  {
+    name: "ghcr.io",
+    image: "./static/images/registryImages/image6.svg",
+  },
+];
+const regDropdown = document.querySelector(
+  ".artifactInputForm .registryDropdown"
+);
+
+function showRegList() {
+  regDropdown.classList.remove("hide");
+  regDropdown.classList.add("show");
+  updateRegList();
+}
+
+function updateRegList() {
+  const filterList = regList.filter((item) =>
+    item?.name.includes(reg.value || "")
+  );
+  if (!filterList.length) {
+    regDropdown.innerHTML = "No match found";
+    return;
+  }
+  let listItems = "";
+  filterList.map(
+    (item) =>
+      (listItems += `<div data-name="${item.name}" class="items">
+      <img src="${item.image}" />
+      <p>${item.name}</p>
+    </div>`)
+  );
+  regDropdown.innerHTML = listItems;
+  document
+    .querySelectorAll(".artifactInputForm .registryDropdown .items")
+    ?.forEach((regElement) =>
+      regElement.addEventListener("click", () => {
+        reg.value = regElement.getAttribute("data-name");
+        updateRegList();
+      })
+    );
 }
 // ends
 
 // tag list javascript
+const tag = document.querySelector(".artifactInputForm #digestortag input");
+const tagListDropdown = document.querySelector(
+  ".artifactInputForm .tagListDropdown"
+);
+
 let tagList = [];
-let filteredTagList = [];
 let isRepoRegChanged = false;
 
 function fetchTagList() {
-  tagListDropdown.innerHTML = "loading...";
-  const URL = `/api/tags?registry=${reg.value}&name=${repo.value}`;
+  tagListDropdown.innerHTML =
+    '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
+  const URL = `/api/tags?registry=${reg.value}/&name=${repo.value}`;
   fetch(URL)
     .then((res) => res.json())
     .then((data) => {
@@ -32,14 +98,24 @@ function fetchTagList() {
       updateTagList();
     })
     .catch((err) => {
-      tagListDropdown.innerHTML = "Cannot fetch list";
+      tagListDropdown.innerHTML = `
+        <div class="error">
+          <img src="./static/images/crossIcon.svg"/>
+          <div>Failed to fetch tags</div>
+        </div>
+      `;
     });
 }
 
 function updateTagList() {
   const filterList = tagList.filter((item) => item.includes(tag.value || ""));
   if (!filterList.length) {
-    tagListDropdown.innerHTML = "No match found";
+    tagListDropdown.innerHTML = `
+    <div class="info">
+      <img src="./static/images/infoIcon.svg"/>
+      <div>No match found</div>
+    </div>
+    `;
     return;
   }
   let html = "";
@@ -47,12 +123,14 @@ function updateTagList() {
 
   tagListDropdown.innerHTML = html;
   isRepoRegChanged = false;
-  document.querySelectorAll(".tagListDropdown p")?.forEach((tagElement) =>
-    tagElement.addEventListener("click", () => {
-      tag.value = tagElement.innerHTML;
-      updateTagList();
-    })
-  );
+  document
+    .querySelectorAll(".artifactInputForm .tagListDropdown p")
+    ?.forEach((tagElement) =>
+      tagElement.addEventListener("click", () => {
+        tag.value = tagElement.innerHTML;
+        updateTagList();
+      })
+    );
 }
 
 function listTags() {
@@ -94,13 +172,13 @@ function alterRightSide(contentId) {
     contentBlocks[i].classList.remove("active");
   }
   selectedContent.classList.add("active");
-  if(contentId === "referrerBlock" && !rsb.isReferrersPrepared) {
+  if (contentId === "referrerBlock" && !rsb.isReferrersPrepared) {
     if (!reg.value || !repo.value || !tag.value) return;
     ar.setReferrers({
       registry: reg.value,
       repo: repo.value,
       tag: tag.value,
-    })
+    });
   }
 }
 // ends
@@ -113,7 +191,7 @@ function switchManifestView(contentId) {
   const selectedContent = document.querySelector(
     `#content_area .main .rightContent #manifestBlock #manifestTable #${contentId}`
   );
-    console.log(selectedContent)
+  console.log(selectedContent);
   for (let i = 0; i < contentBlocks.length; i++) {
     contentBlocks[i].classList.remove("active");
   }
@@ -208,7 +286,7 @@ class RightSideBlock {
         const JSONview = `
           <div class="view-item" id="jsonV">
           <pre>
-            ${prettyPrintJson.toHtml({Manifests: ar.Manifests})}
+            ${prettyPrintJson.toHtml({ Manifests: ar.Manifests })}
           </pre>
           </div>
         `;
@@ -219,7 +297,7 @@ class RightSideBlock {
         const topBar = document.querySelectorAll(
           "#content_area .main .rightContent #manifestBlock #manifestTable .header .menu .view"
         );
-        
+
         topBar?.forEach((item) => {
           item.addEventListener("click", () => {
             topBar?.forEach((item) => item.classList.remove("active"));
@@ -274,8 +352,10 @@ class RightSideBlock {
     window.setTimeout(() => {
       loader.classList.remove("loader");
       loader.classList.add("spinner");
-    
-      $("#content_area .main .rightContent #referrerBlock").bstreeview({ data: ar.Referrers });
+
+      $("#content_area .main .rightContent #referrerBlock").bstreeview({
+        data: ar.Referrers,
+      });
     }, 500);
     // create a tree from recursive object
     // set into the DOM element
@@ -309,7 +389,7 @@ class Artifact {
   setContents(artifact) {
     fetch(
       `/api/artifact?registry=${artifact.registry}&name=${artifact.repo}&${
-        !tagList.includes(artifact.tag) ? "digest" : "tag"
+        !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
       }=${artifact.tag}`
     )
       .then((res) => res.json())
@@ -332,9 +412,10 @@ class Artifact {
   }
 
   setReferrers(artifact) {
-    console.log(artifact)
     fetch(
-      `/api/referrers?registry=${artifact.registry}&name=${artifact.repo}&tag=${artifact.tag}`
+      `/api/referrers?registry=${artifact.registry}&name=${artifact.repo}&${
+        !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
+      }=${artifact.tag}`
     )
       .then((res) => res.json())
       .then((data) => {
@@ -359,17 +440,39 @@ let ar = new Artifact();
 
 // others
 document.addEventListener("click", (event) => {
-  isOutsideTagList =
+  const isOutsideTagList =
     tagListDropdown.contains(event.target) ||
     tag.contains(event.target) ||
     event.target.classList.contains("tagListItem");
+
+  const isOutsideRegList =
+    regDropdown.contains(event.target) ||
+    reg.contains(event.target) ||
+    event.target.classList.contains("regListItem");
+
+  if (!isOutsideRegList) {
+    regDropdown.classList.remove("show");
+    regDropdown.classList.add("hide");
+  }
   if (!isOutsideTagList) {
     tagListDropdown.classList.remove("show");
     tagListDropdown.classList.add("hide");
   }
 });
-document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search);
-  console.log(urlParams);
+document.addEventListener("DOMContentLoaded", function () {
+  const pathname = window.location.pathname;
+  const image = new URLSearchParams(window.location.search).get("image");
+
+  if (!pathname.substring(pathname.lastIndexOf("/") + 1) || !image) return;
+  const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
+  const matches = image.match(regex);
+
+  reg.value = `${matches[1]}`;
+  reg.setAttribute("data-name", `${matches[1]}/`);
+  repo.value = matches[2];
+  tag.value = matches[3];
+
+  fetchTagList();
+  onSubmit("artifact");
 });
 // ends

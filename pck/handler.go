@@ -13,6 +13,7 @@ import (
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	oras "oras.land/oras-go/v2"
 	"oras.land/oras-go/v2/content"
+	// "oras.land/oras-go/v2/registry"
 	"oras.land/oras-go/v2/registry/remote"
 )
 
@@ -95,13 +96,17 @@ func Tags() fiber.Handler {
 
 		result := []string{}
 
-		repo.Tags(ctx, "", func(tags []string) error {
+		err = repo.Tags(ctx, "", func(tags []string) error {
 			for _, tag := range tags {
 				result = append(result, tag)
 			}
 			return nil
 		})
 
+		if err != nil {
+			errResponse := Err("Failed to fetch tags", fiber.StatusNotFound)
+			return c.Status(errResponse.StatusCode).JSON(errResponse)
+		}
 		return c.JSON(result)
 	}
 }
