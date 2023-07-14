@@ -5,16 +5,19 @@
     {{ template "navbar" }}
     <!-- hero section -->
     <div class="hero">
-      <h1>ORAS Artifact Explorer</h1>
-      <p>
-        Explore the content of OCI artifacts from any public repository at ease
-        with ORAS under the hood
-      </p>
-      <a href="/artifact">
-        <button>
+      <div class="heroHead">
+        <h1>ORAS Artifact Explorer</h1>
+        <p>
+          Explore the content of OCI artifacts from any public repository at
+          ease with ORAS under the hood
+        </p>
+      </div>
+      <div class="form">
+        {{ template "form" }}
+        <button onclick='onSubmit("home")'>
           Explore now <img src="./static/images/rightArrow.svg" alt="" />
         </button>
-      </a>
+      </div>
     </div>
     <!-- main body -->
     <div class="main">
@@ -27,11 +30,26 @@
       </div>
       <div class="about">
         <h1>What is ORAS Artifact Explorer?</h1>
+        <p>
+          ORAS is the de facto tool for working with OCI Artifacts. It treats
+          media types as a critical piece of the puzzle. Container images are
+          never assumed to be the artifact in question. ORAS provides CLI and
+          client libraries to distribute artifacts across OCI-compliant
+          registries.
+          ORAS is the de facto tool for working with OCI Artifacts. It treats
+          media types as a critical piece of the puzzle. Container images are
+          never assumed to be the artifact in question. ORAS provides CLI and
+          client libraries to distribute artifacts across OCI-compliant
+          registries.
+        </p>
       </div>
       <div class="features">
         <h1>Features</h1>
       </div>
     </div>
     {{template "footer"}}
+    <script>
+      $(".ui.dropdown").dropdown();
+    </script>
   </body>
 </html>

@@ -9,60 +9,9 @@
       <div class="hero_about"></div>
       <div class="form">
         <h1>Enter artifact details</h1>
-        <div class="ui fluid selection dropdown mb-3">
-          <input type="hidden" name="registry" />
-          <i class="dropdown icon"></i>
-          <div class="default text">Select registry</div>
-          <div class="menu">
-            <div class="item" data-value="docker.io/">
-              <img
-                class="ui mini avatar image"
-                src="./static/images/registryImages/image1.svg"
-              />
-              docker.io
-            </div>
-            <div class="item" data-value="gcr.io/">
-              <img
-                class="ui mini avatar image"
-                src="./static/images/registryImages/image2.svg"
-              />
-              gcr.io
-            </div>
-            <div class="item" data-value="zot.io/">
-              <img
-                class="ui mini avatar image"
-                src="./static/images/registryImages/image4.svg"
-              />
-              zot.io
-            </div>
-          </div>
-        </div>
-
-        <div class="form-floating mb-3">
-          <input
-            type="text"
-            class="form-control"
-            id="floatingInput"
-            placeholder="library/nginx"
-          />
-          <label for="floatingInput">Repository name</label>
-        </div>
-
-        <div class="form-floating mb-3" id="digestortag">
-          <input
-            type="text"
-            class="form-control"
-            id="floatingInput"
-            placeholder="library/nginx"
-            oninput="updateTagList()"
-            onfocus="listTags()"
-          />
-          <label for="floatingInput">Tag or Digest</label>
-          <div class="tagListDropdown hide"></div>
-        </div>
-
+        {{template "form"}}
         <a href="#content_area">
-          <button onclick="onSubmit()">
+          <button onclick='onSubmit("artifact")'>
             <div class="icon">
               <img src="./static/images/downArrow.svg" alt="" />
             </div>

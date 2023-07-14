@@ -1,0 +1,40 @@
+{{ define "form" }}
+<div class="artifactInputForm">
+  <div class="form-floating mb-3" id="registry">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="library/nginx"
+      oninput="updateRegList()"
+      onfocus="showRegList()"
+      onclick="showRegList()"
+    />
+    <label for="floatingInput">Registry</label>
+    <div class="registryDropdown hide"></div>
+  </div>
+
+  <div class="form-floating mb-3" id="repository">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="repository"
+    />
+    <label for="floatingInput">Repository</label>
+  </div>
+
+  <div class="form-floating mb-3" id="digestortag">
+    <input
+      type="text"
+      class="form-control"
+      id="floatingInput"
+      placeholder="tag or digest"
+      oninput="updateTagList()"
+      onfocus="listTags()"
+    />
+    <label for="floatingInput">Tag or Digest</label>
+    <div class="tagListDropdown hide"></div>
+  </div>
+</div>
+{{ end }}
