@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	// "fmt"
 
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	oras "oras.land/oras-go/v2"
@@ -38,7 +37,7 @@ type Artifact struct {
 
 type Referrer struct {
 	Ref  v1.Descriptor `json:"ref"`
-	Intr []Referrer    `json:"intr"`
+	Nodes []Referrer    `json:"nodes"`
 }
 
 type ErrorResponse struct {
@@ -78,10 +77,10 @@ func GenerateReferrerTree(repo *remote.Repository, name string, artifact string)
 	result := []Referrer{}
 	if err := repo.Referrers(ctx, descriptor, "", func(referrers []v1.Descriptor) error {
 		for _, referrer := range referrers {
-			intr, _ := GenerateReferrerTree(repo, artifact+ATSYMBOL+string(referrer.Digest), artifact)
+			nodes, _ := GenerateReferrerTree(repo, artifact+ATSYMBOL+string(referrer.Digest), artifact)
 			res := Referrer{
 				Ref:  referrer,
-				Intr: intr,
+				Nodes: nodes,
 			}
 
 			result = append(result, res)

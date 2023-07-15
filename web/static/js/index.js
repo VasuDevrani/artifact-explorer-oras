@@ -4,6 +4,28 @@ const artifact = document.querySelector("#content_area");
 const rows = document.querySelectorAll("#table_digest");
 
 // function calls
+async function displayArtifactContents() {
+  try {
+    document
+      .getElementById("content_area")
+      .scrollIntoView({ behavior: "smooth" });
+
+    // rsb.isManifestPrepared = false;
+    rsb.isReferrersPrepared = false;
+    rsb.isBlobsPrepared = false;
+    document
+      .querySelectorAll("#content_area .main .leftSideBar ul li")
+      .forEach((item) => item.classList.remove("active"));
+    document
+      .querySelector("#content_area .main .leftSideBar #manifest")
+      .classList.add("active");
+
+    alterRightSide("manifestBlock");
+  } catch (error) {
+    console.error(error);
+  }
+}
+
 function onSubmit(currentPage) {
   if (!reg.value || !repo.value || !tag.value) return;
   if (currentPage === "home") {
@@ -11,12 +33,21 @@ function onSubmit(currentPage) {
       !tagList || !tagList.includes(tag.value) ? "@" : ":"
     }${tag.value}`;
   } else if (currentPage === "artifact") {
-    const err = ar.setContents({
-      registry: `${reg.value}/`,
-      repo: repo.value,
-      tag: tag.value,
-    });
-    alterRightSide("manifestBlock");
+    artifact.classList.remove("hide");
+    artifact.classList.add("show");
+    rsb.isManifestPrepared = false;
+    displayArtifactContents();
+    const artifactUrl = `?image=${reg.value}/${repo.value}${
+      !tagList || !tagList.includes(tag.value) ? "@" : ":"
+    }${tag.value}`;
+    window.history.pushState(
+      {
+        page: currentPage,
+        artifactUrl: artifactUrl,
+      },
+      "",
+      artifactUrl
+    );
   }
 }
 // ends
@@ -55,7 +86,10 @@ function updateRegList() {
     item?.name.includes(reg.value || "")
   );
   if (!filterList.length) {
-    regDropdown.innerHTML = "No match found";
+    regDropdown.innerHTML = `<div class="info">
+    <img src="./static/images/infoIcon.svg"/>
+    <div>No match found</div>
+  </div>`;
     return;
   }
   let listItems = "";
@@ -88,23 +122,27 @@ let tagList = [];
 let isRepoRegChanged = false;
 
 function fetchTagList() {
-  tagListDropdown.innerHTML =
-    '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
-  const URL = `/api/tags?registry=${reg.value}/&name=${repo.value}`;
-  fetch(URL)
-    .then((res) => res.json())
-    .then((data) => {
-      tagList = data;
-      updateTagList();
-    })
-    .catch((err) => {
-      tagListDropdown.innerHTML = `
-        <div class="error">
-          <img src="./static/images/crossIcon.svg"/>
-          <div>Failed to fetch tags</div>
-        </div>
-      `;
-    });
+  return new Promise((resolve, reject) => {
+    tagListDropdown.innerHTML =
+      '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
+    const URL = `/api/tags?registry=${reg.value}/&name=${repo.value}`;
+    fetch(URL)
+      .then((res) => res.json())
+      .then((data) => {
+        tagList = data;
+        updateTagList();
+        resolve();
+      })
+      .catch((err) => {
+        tagListDropdown.innerHTML = `
+          <div class="error">
+            <img src="./static/images/crossIcon.svg"/>
+            <div>Failed to fetch tags</div>
+          </div>
+        `;
+        reject(err);
+      });
+  });
 }
 
 function updateTagList() {
@@ -172,30 +210,57 @@ function alterRightSide(contentId) {
     contentBlocks[i].classList.remove("active");
   }
   selectedContent.classList.add("active");
+  if (contentId === "manifestBlock" && !rsb.isManifestPrepared) {
+    rsb.prepareManifestsBlock();
+  }
   if (contentId === "referrerBlock" && !rsb.isReferrersPrepared) {
     if (!reg.value || !repo.value || !tag.value) return;
-    ar.setReferrers({
-      registry: reg.value,
-      repo: repo.value,
-      tag: tag.value,
-    });
+    rsb.prepareReferrersBlock();
+  }
+  if (contentId === "blobBlock" && !rsb.isBlobsPrepared) {
+    rsb.prepareBlobsBlock();
   }
 }
 // ends
 
+// referrer Tree
+function generateTree(treeData) {
+  let html = "";
+  treeData.forEach((node) => {
+    html += `
+      <li>
+        <details>
+          <summary>${node.ref.artifactType}</summary>
+          <ul>
+            <li id="digest"><a href="/artifact?image=${reg.value}/${
+      repo.value
+    }@${node.ref.digest}" target="_blank">${node.ref.digest}</a></li>
+            ${node.nodes && generateTree(node.nodes)}
+          </ul>
+        </details>
+      </li>
+    `;
+  });
+  return html;
+}
+// ends
+
 // right side javascript
-function switchManifestView(contentId) {
-  const contentBlocks = document.querySelectorAll(
-    "#content_area .main .rightContent #manifestBlock #manifestTable .view-item"
+function switchView(contentId, elementId, headClass) {
+  const contentHeads = document.querySelectorAll(`#${elementId} .header .view`);
+  const selectedHead = document.querySelector(
+    `#${elementId} .header .${headClass}`
   );
-  const selectedContent = document.querySelector(
-    `#content_area .main .rightContent #manifestBlock #manifestTable #${contentId}`
-  );
-  console.log(selectedContent);
+  const contentBlocks = document.querySelectorAll(`#${elementId} .view-item`);
+  const selectedContent = document.querySelector(`#${elementId} #${contentId}`);
   for (let i = 0; i < contentBlocks.length; i++) {
     contentBlocks[i].classList.remove("active");
   }
+  for (let i = 0; i < contentHeads.length; i++) {
+    contentHeads[i].classList.remove("active");
+  }
   selectedContent.classList.add("active");
+  selectedHead.classList.add("active");
 }
 
 function blockTemplate(title, table, json, views) {
@@ -204,10 +269,10 @@ function blockTemplate(title, table, json, views) {
     <div class="header">
     <h1>${title}</h1>
     <div class="ui tabular menu">
-      <a class="item active view" onclick='switchManifestView("table")'>
+      <a class="item active view aa" onclick='switchView("table", "${views.id}", "aa")'>
         TABLE VIEW
       </a>
-      <a class="item view" onclick='switchManifestView("jsonV")'>
+      <a class="item view bb" onclick='switchView("jsonV", "${views.id}","bb")'>
         JSON VIEW
       </a>
       <div class="item">
@@ -229,26 +294,38 @@ class RightSideBlock {
 
   prepareMetaData() {
     let inp = document.querySelectorAll("#content_area .metaData .ui input");
-    inp[0].value = ar.Artifact;
-    inp[1].value = ar.Digest;
-    inp[2].value = ar.MediaType;
+    inp[0].value = ar.Artifact ? ar.Artifact : "not available";
+    inp[1].value = ar.Digest ? ar.Digest : "not available";
+    inp[2].value = ar.MediaType ? ar.MediaType : "not available";
   }
 
-  prepareManifestsBlock() {
-    if (this.isManifestPrepared || (!ar.Manifests && !ar.Layers && !ar.Configs))
-      return;
-
+  async prepareManifestsBlock() {
+    if (this.isManifestPrepared) return;
+    const b1 = document.querySelector("#manifestBlock");
     const loader = document.querySelector(
-      "#content_area .main .rightContent .spinner-border"
-    );
-    const b1 = document.querySelector(
-      "#content_area .main .rightContent #manifestBlock"
+      "#content_area .main .rightContent .loadingBlock"
     );
     b1.innerHTML = "";
 
     loader.classList.remove("spinner");
     loader.classList.add("loader");
-    window.setTimeout(() => {
+    try {
+      await ar.setContents({
+        registry: `${reg.value}/`,
+        repo: repo.value,
+        tag: tag.value,
+      });
+
+      rsb.prepareMetaData();
+      if (!ar.Manifests && !ar.Layers && !ar.Configs) {
+        b1.innerHTML = `
+        <div class="error">
+          <img src="./static/images/crossIcon.svg"/>
+          <div>Failed to fetch manifests</div>
+        </div>`;
+        rsb.isManifestPrepared = true;
+        return;
+      }
       loader.classList.remove("loader");
       loader.classList.add("spinner");
 
@@ -260,7 +337,7 @@ class RightSideBlock {
               <td colspan="2">${item.mediaType}</td>
               <td>${item.size}</td>
               <td colspan="3" id="digest">
-              <div> ${item.digest} </div>
+              <div id="digest"> ${item.digest} </div>
               <img src="./static/images/copyIcon.svg" id="copyIcon">
               </td>
               <td colspan="2">${item.platform?.architecture}</td>
@@ -290,12 +367,93 @@ class RightSideBlock {
           </pre>
           </div>
         `;
-        b1.innerHTML = blockTemplate("Content Manifests", table, JSONview, {
+        b1.innerHTML += blockTemplate("Content Manifests", table, JSONview, {
           id: "manifestTable",
         });
 
         const topBar = document.querySelectorAll(
-          "#content_area .main .rightContent #manifestBlock #manifestTable .header .menu .view"
+          "#manifestTable .header .menu .view"
+        );
+
+        topBar?.forEach((item) => {
+          item.addEventListener("click", () => {
+            topBar?.forEach((item) => item.classList.remove("active"));
+            item.classList.add("active");
+          });
+        });
+        document
+          .querySelectorAll("#manifestTable table #digest")
+          .forEach((digest) =>
+            digest.addEventListener("click", async function (event) {
+              event.preventDefault();
+              const artifactUrl = `?image=${reg.value}/${repo.value}${
+                !tagList || !tagList.includes(tag.value) ? "@" : ":"
+              }${tag.value}`;
+              window.history.pushState(
+                {
+                  page: "artifact",
+                  artifactUrl: artifactUrl,
+                },
+                "",
+                artifactUrl
+              );
+              if (event.target.classList.contains("handled")) {
+                return;
+              }
+              event.target.classList.add("handled");
+              const d = digest.textContent.trim();
+              tag.value = d;
+              rsb.isManifestPrepared = false;
+              try {
+                await fetchTagList();
+                await displayArtifactContents();
+              } catch (error) {
+                console.error(error);
+              }
+            })
+          );
+      }
+
+      if (ar.Layers) {
+        let records = "";
+        ar.Layers.forEach((item, ind) => {
+          records += `
+            <tr>
+              <td colspan="2">${item.mediaType}</td>
+              <td>${item.size}</td>
+              <td colspan="4" id="digest">
+              <div id="digest"> ${item.digest} </div>
+              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              </td>
+            </tr>`;
+        });
+        const table = `
+          <div class="view-item active" id="table">
+          <table class="ui fixed single line celled table">
+          <thead>
+          <tr>
+            <th scope="col" colspan="2">Mediatype</th>
+            <th scope="col">Size</th>
+            <th scope="col" colspan="4">Digest</th>
+          </tr>
+          </thead>
+          ${records}
+          </table>
+          </div>`;
+
+        const JSONview = `
+          <div class="view-item" id="jsonV">
+          <pre>
+            ${prettyPrintJson.toHtml({ Layers: ar.Layers })}
+          </pre>
+          </div>
+        `;
+        b1.innerHTML += blockTemplate("Layers", table, JSONview, {
+          id: "layersTable",
+        });
+
+        const topBar = document.querySelectorAll(
+          "#layersTable .header .menu .view"
         );
 
         topBar?.forEach((item) => {
@@ -305,68 +463,295 @@ class RightSideBlock {
           });
         });
       }
+
       if (ar.Configs) {
-      }
-      if (ar.Layers) {
+        let Configs = [];
+        if (!Array.isArray(ar.Configs)) {
+          Configs.push(ar.Configs);
+        } else {
+          Configs = ar.Configs;
+        }
         let records = "";
-        ar.Layers.forEach((item, ind) => {
+        Configs.forEach((item, ind) => {
           records += `
             <tr>
               <td colspan="2">${item.mediaType}</td>
               <td>${item.size}</td>
-              <td colspan="3">${item.digest}</td>
+              <td colspan="4" id="digest">
+              <div id="digest"> ${item.digest} </div>
+              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              </td>
             </tr>`;
         });
         const table = `
+          <div class="view-item active" id="table">
           <table class="ui fixed single line celled table">
           <thead>
           <tr>
-            <th scope="col" colspan="3">Mediatype</th>
+            <th scope="col" colspan="2">Mediatype</th>
             <th scope="col">Size</th>
-            <th scope="col" colspan="5">Digest</th>
+            <th scope="col" colspan="4">Digest</th>
           </tr>
           </thead>
           ${records}
-          </table>`;
+          </table>
+          </div>`;
 
-        b1.innerHTML += blockTemplate("Layers", table, {
-          id: "layersTable",
+        const JSONview = `
+          <div class="view-item" id="jsonV">
+          <pre>
+            ${prettyPrintJson.toHtml({ Configs })}
+          </pre>
+          </div>
+        `;
+        b1.innerHTML += blockTemplate("Configs", table, JSONview, {
+          id: "configsTable",
+        });
+
+        const topBar = document.querySelectorAll(
+          "#configsTable .header .menu .view"
+        );
+
+        topBar?.forEach((item) => {
+          item.addEventListener("click", () => {
+            topBar?.forEach((item) => item.classList.remove("active"));
+            item.classList.add("active");
+          });
         });
       }
-    }, 500);
+      rsb.isManifestPrepared = true;
+    } catch (err) {
+      b1.innerHTML = `
+        <div class="error">
+          <img src="./static/images/crossIcon.svg"/>
+          <div>Failed to fetch manifests</div>
+        </div>`;
+      rsb.isManifestPrepared = false;
+      return;
+    }
   }
 
-  prepareReferrersBlock() {
-    if (this.isReferrersPrepared || !ar.Referrers) return;
+  async prepareReferrersBlock() {
+    if (this.isReferrersPrepared) return;
 
     const loader = document.querySelector(
-      "#content_area .main .rightContent .spinner-border"
+      "#content_area .main .rightContent .loadingBlock"
     );
-    const b1 = document.querySelector(
-      "#content_area .main .rightContent #referrerBlock"
-    );
-    b1.innerHTML = "";
+    const treeView = document.getElementById("referrerBlock");
+    treeView.innerHTML = "";
 
     loader.classList.remove("spinner");
     loader.classList.add("loader");
-    window.setTimeout(() => {
+    try {
+      await ar.setReferrers({
+        registry: reg.value,
+        repo: repo.value,
+        tag: tag.value,
+      });
       loader.classList.remove("loader");
       loader.classList.add("spinner");
 
-      $("#content_area .main .rightContent #referrerBlock").bstreeview({
-        data: ar.Referrers,
+      if (!ar.Referrers.length) {
+        treeView.innerHTML = `
+        <div class="info">
+          <img src="./static/images/infoIcon.svg"/>
+          <div>No referrers available</div>
+        </div>
+        `;
+        rsb.isReferrersPrepared = true;
+        return;
+      }
+      const JSONview = `
+        <div class="view-item" id="jsonV">
+          <pre>
+            ${prettyPrintJson.toHtml({ Referrers: ar.Referrers })}
+          </pre>
+        </div>`;
+      const treeV = `
+      <div id="treeV" class="view-item active">
+        <ul>${generateTree(ar.Referrers)}</ul>
+      </div>`;
+      treeView.innerHTML = `
+      <div id="referrers">
+        <div class="header">
+        <h1>Referrers</h1>
+        <div class="ui tabular menu">
+          <a class="item active view aa" onclick='switchView("treeV", "referrers", "aa")'>
+            TREE VIEW
+          </a>
+          <a class="item view bb" onclick='switchView("jsonV", "referrers", "bb")'>
+            JSON VIEW
+          </a>
+          <div class="item">
+            <div class="ui primary button">DOWNLOAD</div>
+          </div>
+        </div>
+        </div>
+        ${treeV}
+        ${JSONview}
+      </div>
+      `;
+      var treeNodes = document.getElementsByClassName("tree-node");
+
+      Array.from(treeNodes).forEach(function (node) {
+        var content = node.querySelector(".tree-content");
+        var children = node.querySelector(".tree-children");
+
+        if (children) {
+          content.addEventListener("click", function () {
+            node.classList.toggle("collapsed");
+            children.style.display = node.classList.contains("collapsed")
+              ? "none"
+              : "block";
+          });
+        }
       });
-    }, 500);
-    // create a tree from recursive object
-    // set into the DOM element
+      rsb.isReferrersPrepared = true;
+    } catch (err) {
+      treeView.innerHTML = `
+      <div class="error">
+        <img src="./static/images/crossIcon.svg"/>
+        <div>Failed to fetch referrers</div>
+      </div>
+      `;
+      rsb.isReferrersPrepared = false;
+    }
   }
 
-  prepareBlobsBlock() {
-    if (this.isBlobsPrepared || (!ar.Layers && !ar.Configs)) return;
-    // generate Table
-    // create Views object for download and json view
-    // generate Block from BlockTemplate
-    // set into the DOM element
+  async prepareBlobsBlock() {
+    if (this.isBlobsPrepared) return;
+
+    const loader = document.querySelector(
+      "#content_area .main .rightContent .loadingBlock"
+    );
+    const blobView = document.getElementById("blobBlock");
+    blobView.innerHTML = "";
+
+    loader.classList.remove("spinner");
+    loader.classList.add("loader");
+    try {
+      if (!ar.isManifestPrepared) {
+        await ar.setContents({
+          registry: `${reg.value}/`,
+          repo: repo.value,
+          tag: tag.value,
+        });
+      }
+      if (!ar.isReferrersPrepared) {
+        await ar.setReferrers({
+          registry: reg.value,
+          repo: repo.value,
+          tag: tag.value,
+        });
+      }
+      let blobs = {};
+      if (ar.Configs) {
+        let Configs = [];
+        if (!Array.isArray(ar.Configs)) {
+          Configs.push(ar.Configs);
+        } else {
+          Configs = ar.Configs;
+        }
+
+        Configs.forEach((item) => (blobs[item.mediaType] = [item]));
+      }
+      if (ar.Layers) {
+        ar.Layers.forEach((item) => {
+          if (blobs[item.mediaType]) {
+            blobs[item.mediaType].push(item);
+          } else {
+            blobs[item.mediaType] = [item];
+          }
+        });
+      }
+      if (ar.Referrers) {
+        ar.Referrers.forEach((item) => {
+          if (blobs[item.ref.mediaType]) {
+            blobs[item.ref.mediaType].push(item.ref);
+          } else {
+            blobs[item.ref.mediaType] = [item.ref];
+          }
+        });
+      }
+
+      loader.classList.remove("loader");
+      loader.classList.add("spinner");
+
+      if (!Object.keys(blobs).length) {
+        blobView.innerHTML = `
+        <div class="info">
+          <img src="./static/images/infoIcon.svg"/>
+          <div>No Blobs available</div>
+        </div>
+        `;
+        rsb.isBlobsPrepared = true;
+        return;
+      }
+
+      const keys = Object.keys(blobs);
+      let html = "";
+      keys.forEach((item, ind) => {
+        let records = "";
+        blobs[item].forEach((b) => {
+          records += `
+            <tr>
+              <td colspan="2">${b.mediaType}</td>
+              <td>${b.size}</td>
+              <td colspan="4" id="digest">
+              <div id="digest"> ${b.digest} </div>
+              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              </td>
+            </tr>`;
+        });
+        const table = `
+            <h2>${item}</h2>
+            <table class="ui fixed single line celled table">
+            <thead>
+            <tr>
+              <th scope="col" colspan="2">Mediatype</th>
+              <th scope="col">Size</th>
+              <th scope="col" colspan="4">Digest</th>
+            </tr>
+            </thead>
+            ${records}
+            </table>`;
+        html += table;
+      });
+
+      html = `<div class="view-item active" id="table">${html}</div>`;
+
+      const JSONview = `
+          <div class="view-item" id="jsonV">
+          <pre>
+            ${prettyPrintJson.toHtml({ Blobs: blobs })}
+          </pre>
+          </div>
+        `;
+      blobView.innerHTML += blockTemplate("Artifact Blobs", html, JSONview, {
+        id: "blobTable",
+      });
+
+      const topBar = document.querySelectorAll(
+        "#blobTable .header .menu .view"
+      );
+
+      topBar?.forEach((item) => {
+        item.addEventListener("click", () => {
+          topBar?.forEach((item) => item.classList.remove("active"));
+          item.classList.add("active");
+        });
+      });
+      rsb.isBlobsPrepared = true;
+    } catch (err) {
+      console.log(err);
+      blobView.innerHTML = `
+      <div class="error">
+        <img src="./static/images/crossIcon.svg"/>
+        <div>Failed to fetch blobs</div>
+      </div>
+      `;
+      rsb.isBlobsPrepared = false;
+    }
   }
 }
 
@@ -386,52 +771,49 @@ class Artifact {
     this.Referrers = null;
   }
 
-  setContents(artifact) {
-    fetch(
-      `/api/artifact?registry=${artifact.registry}&name=${artifact.repo}&${
-        !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
-      }=${artifact.tag}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        this.Artifact = data.Artifact;
-        this.MediaType = data.MediaType;
-        this.Configs = data.Configs;
-        this.Manifests = data.Manifests;
-        this.Layers = data.Layers;
-        this.Digest = data.Digest;
+  async setContents(artifact) {
+    try {
+      const response = await fetch(
+        `/api/artifact?registry=${artifact.registry}&name=${artifact.repo}&${
+          !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
+        }=${artifact.tag}`
+      );
 
-        rsb.prepareMetaData();
-        rsb.prepareManifestsBlock();
-        return null;
-      })
-      .catch((err) => {
-        console.log(err);
-        return err;
-      });
+      if (!response.ok) {
+        throw new Error("Failed to fetch manifests");
+      }
+      const data = await response.json();
+      this.Artifact = data.Artifact;
+      this.MediaType = data.MediaType;
+      this.Configs = data.Configs;
+      this.Manifests = data.Manifests;
+      this.Layers = data.Layers;
+      this.Digest = data.Digest;
+
+      return null;
+    } catch (err) {
+      return err;
+    }
   }
 
-  setReferrers(artifact) {
-    fetch(
-      `/api/referrers?registry=${artifact.registry}&name=${artifact.repo}&${
-        !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
-      }=${artifact.tag}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        this.Referrers = data;
-        rsb.prepareReferrersBlock();
-        // rsb.isReferrersPrepared = true;
-        return null;
-      })
-      .catch((err) => {
-        console.log(err);
-        return err;
-      });
-  }
+  async setReferrers(artifact) {
+    try {
+      const response = await fetch(
+        `/api/referrers?registry=${artifact.registry}/&name=${artifact.repo}&${
+          !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
+        }=${artifact.tag}`
+      );
 
-  setBlobs() {
-    this.Blobs = [...this.Configs, ...this.Layers];
+      if (!response.ok) {
+        throw new Error("Failed to fetch referrers");
+      }
+
+      const data = await response.json();
+      this.Referrers = data;
+      return null;
+    } catch (err) {
+      return err;
+    }
   }
 }
 
@@ -459,7 +841,29 @@ document.addEventListener("click", (event) => {
     tagListDropdown.classList.add("hide");
   }
 });
-document.addEventListener("DOMContentLoaded", function () {
+window.addEventListener("popstate", async function (event) {
+  if (event.state && event.state.page === "artifact") {
+    const artifactUrl = event.state.artifactUrl;
+    const searchParams = new URLSearchParams(artifactUrl);
+    const image = searchParams.get("image");
+    const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
+    const matches = image.match(regex);
+
+    reg.value = matches[1];
+    repo.value = matches[2];
+    tag.value = matches[3];
+
+    rsb.isManifestPrepared = false;
+    try {
+      await fetchTagList();
+      await displayArtifactContents();
+    } catch (error) {
+      console.error(error);
+    }
+  }
+});
+
+document.addEventListener("DOMContentLoaded", async function () {
   const pathname = window.location.pathname;
   const image = new URLSearchParams(window.location.search).get("image");
 
@@ -468,11 +872,18 @@ document.addEventListener("DOMContentLoaded", function () {
   const matches = image.match(regex);
 
   reg.value = `${matches[1]}`;
-  reg.setAttribute("data-name", `${matches[1]}/`);
   repo.value = matches[2];
   tag.value = matches[3];
 
-  fetchTagList();
-  onSubmit("artifact");
+  artifact.classList.remove("hide");
+  artifact.classList.add("show");
+
+  rsb.isManifestPrepared = false;
+  try {
+    await fetchTagList();
+    await displayArtifactContents();
+  } catch (error) {
+    console.error(error);
+  }
 });
 // ends

@@ -3,7 +3,7 @@
 :root {
   /* colors */
   --primary-color: #4053b8;
-  --primary-color-light: #007aff;
+  --primary-color-light: #2185d0;
   --primary-gradient: linear-gradient(101deg, #4051b5 15.63%, #4285f4 90.96%);
   --secondary-color-light: rgba(208, 205, 205, 0.82);
   --secondary-color: #303846;
@@ -31,7 +31,7 @@ body {
 
 a {
   text-decoration: none;
-  color: var(--secondary-color-light);
+  color: var(--primary-color-light);
 }
 button {
   border: none;
@@ -64,6 +64,10 @@ nav ul {
   align-items: center;
   margin-bottom: 0;
   justify-content: space-between;
+}
+nav a {
+  text-decoration: none;
+  color: var(--secondary-color-light);
 }
 nav ul li a:hover {
   color: var(--text-light);
