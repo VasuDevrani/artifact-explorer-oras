@@ -13,10 +13,10 @@ func AppRouter(app fiber.Router) {
 
 	app.Get("/api/tags", Tags())
 
-	app.Get("/api/referrers", Referrers())
-
 	app.Get("/api/blob", BlobContent())
-
+	
+	app.Get("/api/referrers", Referrers())
+	
 	app.Get("/api/artifact", Manifest())
 
 	app.Get("*", func(c *fiber.Ctx) error {

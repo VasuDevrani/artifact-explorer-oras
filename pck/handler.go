@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 
 	"github.com/gofiber/fiber/v2"
@@ -64,7 +63,7 @@ func Manifest() fiber.Handler {
 		result := ArtifactContent{
 			Artifact:  a.Name,
 			Manifests: data["manifests"],
-			Configs:   data["configs"],
+			Configs:   data["config"],
 			Layers:    data["layers"],
 			Digest:    a.Digest,
 		}
@@ -151,13 +150,11 @@ func BlobContent() fiber.Handler {
 
 		ctx := context.Background()
 		descriptor, err := repo.Blobs().Resolve(ctx, a.Name)
-		fmt.Print("2", err == nil)
 		if err != nil {
 			errResponse := Err("Cannot resolve descriptor with provided reference from the target", fiber.StatusNotFound)
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
 		rc, err := repo.Fetch(ctx, descriptor)
-		fmt.Print(err == nil)
 		if err != nil {
 			errResponse := Err("Failed to fetch contents of artifact blob", fiber.StatusNotFound)
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
