@@ -36,7 +36,6 @@ function onSubmit(currentPage) {
     artifact.classList.remove("hide");
     artifact.classList.add("show");
     rsb.isManifestPrepared = false;
-    displayArtifactContents();
     const artifactUrl = `?image=${reg.value}/${repo.value}${
       !tagList || !tagList.includes(tag.value) ? "@" : ":"
     }${tag.value}`;
@@ -48,6 +47,7 @@ function onSubmit(currentPage) {
       "",
       artifactUrl
     );
+    displayArtifactContents();
   }
 }
 // ends
@@ -316,6 +316,8 @@ class RightSideBlock {
         tag: tag.value,
       });
 
+      loader.classList.remove("loader");
+      loader.classList.add("spinner");
       rsb.prepareMetaData();
       if (!ar.Manifests && !ar.Layers && !ar.Configs) {
         b1.innerHTML = `
@@ -324,11 +326,10 @@ class RightSideBlock {
           <div>Failed to fetch manifests</div>
         </div>`;
         rsb.isManifestPrepared = true;
-        return;
+        console.log(ar, "1");
       }
-      loader.classList.remove("loader");
-      loader.classList.add("spinner");
 
+      console.log(ar, "2");
       if (ar.Manifests) {
         let records = "";
         ar.Manifests.forEach((item, ind) => {
@@ -520,14 +521,15 @@ class RightSideBlock {
         });
       }
       rsb.isManifestPrepared = true;
+      console.log(ar, "3");
     } catch (err) {
+      console.log(err, "erorororo");
       b1.innerHTML = `
         <div class="error">
           <img src="./static/images/crossIcon.svg"/>
           <div>Failed to fetch manifests</div>
         </div>`;
       rsb.isManifestPrepared = false;
-      return;
     }
   }
 
@@ -792,6 +794,14 @@ class Artifact {
 
       return null;
     } catch (err) {
+      this.Artifact = "";
+      this.MediaType = "";
+      this.Digest = "";
+      this.Manifests = null;
+      this.Configs = null;
+      this.Layers = null;
+      this.Blobs = null;
+      this.Referrers = null;
       return err;
     }
   }
