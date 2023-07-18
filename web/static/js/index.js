@@ -166,6 +166,8 @@ function updateTagList() {
     ?.forEach((tagElement) =>
       tagElement.addEventListener("click", () => {
         tag.value = tagElement.innerHTML;
+        tagListDropdown.classList.remove("show");
+        tagListDropdown.classList.add("hide");
         updateTagList();
       })
     );
@@ -190,6 +192,7 @@ reg.addEventListener("change", () => (isRepoRegChanged = true));
 const sidebarItems = document.querySelectorAll(
   "#content_area .main .leftSideBar ul li"
 );
+const blobSidebarItem = document.querySelector("#blobSidebarItem");
 
 sidebarItems.forEach((item) => {
   item.addEventListener("click", () => {
@@ -326,10 +329,15 @@ class RightSideBlock {
           <div>Failed to fetch manifests</div>
         </div>`;
         rsb.isManifestPrepared = true;
-        console.log(ar, "1");
       }
 
-      console.log(ar, "2");
+      if(!ar.Layers && !ar.Configs) {
+        blobSidebarItem.classList.remove("show");
+        blobSidebarItem.classList.add("hide");
+      } else {
+        blobSidebarItem.classList.remove("hide");
+        blobSidebarItem.classList.add("show");
+      }
       if (ar.Manifests) {
         let records = "";
         ar.Manifests.forEach((item, ind) => {
@@ -521,9 +529,7 @@ class RightSideBlock {
         });
       }
       rsb.isManifestPrepared = true;
-      console.log(ar, "3");
     } catch (err) {
-      console.log(err, "erorororo");
       b1.innerHTML = `
         <div class="error">
           <img src="./static/images/crossIcon.svg"/>
@@ -563,12 +569,12 @@ class RightSideBlock {
         rsb.isReferrersPrepared = true;
         return;
       }
-      const JSONview = `
-        <div class="view-item" id="jsonV">
-          <pre>
-            ${prettyPrintJson.toHtml({ Referrers: ar.Referrers })}
-          </pre>
-        </div>`;
+      // const JSONview = `
+      //   <div class="view-item" id="jsonV">
+      //     <pre>
+      //       ${prettyPrintJson.toHtml({ Referrers: ar.Referrers })}
+      //     </pre>
+      //   </div>`;
       const treeV = `
       <div id="treeV" class="view-item active">
         <ul>${generateTree(ar.Referrers)}</ul>
@@ -581,16 +587,12 @@ class RightSideBlock {
           <a class="item active view aa" onclick='switchView("treeV", "referrers", "aa")'>
             TREE VIEW
           </a>
-          <a class="item view bb" onclick='switchView("jsonV", "referrers", "bb")'>
-            JSON VIEW
-          </a>
           <div class="item">
             <div class="ui primary button">DOWNLOAD</div>
           </div>
         </div>
         </div>
         ${treeV}
-        ${JSONview}
       </div>
       `;
       var treeNodes = document.getElementsByClassName("tree-node");
@@ -745,7 +747,6 @@ class RightSideBlock {
       });
       rsb.isBlobsPrepared = true;
     } catch (err) {
-      console.log(err);
       blobView.innerHTML = `
       <div class="error">
         <img src="./static/images/crossIcon.svg"/>

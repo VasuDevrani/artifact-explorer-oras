@@ -88,7 +88,8 @@
   background-color: var(--text-light);
 }
 .tagListDropdown .error,
-.tagListDropdown .info, .registryDropdown .info {
+.tagListDropdown .info,
+.registryDropdown .info {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -98,7 +99,8 @@
   flex-direction: column;
 }
 .tagListDropdown .error img,
-.tagListDropdown .info img, .registryDropdown .info img {
+.tagListDropdown .info img,
+.registryDropdown .info img {
   width: 32px;
 }
 .registryDropdown .items {
@@ -296,7 +298,8 @@
 #referrerBlock .info img,
 #referrerBlock .error img,
 #manifestBlock .error img,
-#blobBlock .error img, #blobBlock .info img {
+#blobBlock .error img,
+#blobBlock .info img {
   width: 40px;
 }
 #manifestTable,
@@ -327,6 +330,11 @@
   overflow: auto;
   width: 100%;
 }
+#jsonV > pre > span:nth-child(1) {
+  display: inline-block;
+  margin-left: -90px;
+}
+
 #manifestTable .view-item.active,
 #layersTable .view-item.active,
 #configsTable .view-item.active,
