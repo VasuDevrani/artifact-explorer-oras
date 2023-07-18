@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"encoding/json"
 
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	oras "oras.land/oras-go/v2"
@@ -9,8 +10,6 @@ import (
 )
 
 const (
-	CONFIG      = "config"
-	TAR         = "tar"
 	TARDOWNLOAD = "tardownload"
 	ATSYMBOL    = "@"
 	COLONSYMBOL = ":"
@@ -98,4 +97,9 @@ func Err(errorMessage string, statusCode int) ErrorResponse {
 		Message:    errorMessage,
 	}
 	return errResponse
+}
+
+func isJSON(data []byte) bool {
+	var js map[string]interface{}
+	return json.Unmarshal(data, &js) == nil
 }

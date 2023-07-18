@@ -331,7 +331,7 @@ class RightSideBlock {
         rsb.isManifestPrepared = true;
       }
 
-      if(!ar.Layers && !ar.Configs) {
+      if (!ar.Layers && !ar.Configs) {
         blobSidebarItem.classList.remove("show");
         blobSidebarItem.classList.add("hide");
       } else {
@@ -431,7 +431,10 @@ class RightSideBlock {
               <td colspan="2">${item.mediaType}</td>
               <td>${item.size}</td>
               <td colspan="4" id="digest">
-              <div id="digest"> ${item.digest} </div>
+              <div id="digest">
+              <a href="/blob?layer=${reg.value}/${repo.value}@${item.digest}" target="_blank">
+              ${item.digest}
+              </a></div>
               <img src="./static/images/copyIcon.svg" id="copyIcon">
               </td>
             </tr>`;
@@ -487,7 +490,9 @@ class RightSideBlock {
               <td colspan="2">${item.mediaType}</td>
               <td>${item.size}</td>
               <td colspan="4" id="digest">
-              <div id="digest"> ${item.digest} </div>
+              <div id="digest"><a href="/blob?layer=${reg.value}/${repo.value}@${item.digest}" target="_blank">
+              ${item.digest}
+              </a></div>
               <img src="./static/images/copyIcon.svg" id="copyIcon">
               </td>
             </tr>`;
@@ -702,7 +707,10 @@ class RightSideBlock {
               <td colspan="2">${b.mediaType}</td>
               <td>${b.size}</td>
               <td colspan="4" id="digest">
-              <div id="digest"> ${b.digest} </div>
+              <div id="digest">
+              <a href="/blob?layer=${reg.value}/${repo.value}@${b.digest}" target="_blank"> 
+              ${b.digest} 
+              </a></div>
               <img src="./static/images/copyIcon.svg" id="copyIcon">
               </td>
             </tr>`;

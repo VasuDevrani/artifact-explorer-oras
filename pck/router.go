@@ -11,6 +11,10 @@ func AppRouter(app fiber.Router) {
         return c.Render("artifact", nil)
     })
 
+	app.Get("/blob", func(c *fiber.Ctx) error {
+        return c.Render("blob", nil)
+    })
+
 	app.Get("/api/tags", Tags())
 
 	app.Get("/api/blob", BlobContent())

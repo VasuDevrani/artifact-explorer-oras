@@ -164,7 +164,14 @@ func BlobContent() fiber.Handler {
 			errResponse := Err("Failed to fetch contents of artifact blob", fiber.StatusInternalServerError)
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
-		if t == CONFIG {
+		if t == TARDOWNLOAD {
+			c.Set("Content-Type", "application/x-tar")
+			c.Set("Content-Disposition", "attachment; filename=file.tar")
+
+			return c.Send(pulledBlob)
+		}
+
+		if isJSON(pulledBlob) {
 			jsonData := string(pulledBlob)
 
 			var data map[string]interface{}
@@ -174,7 +181,7 @@ func BlobContent() fiber.Handler {
 				return c.Status(errResponse.StatusCode).JSON(errResponse)
 			}
 			return c.JSON(data)
-		} else if t == TAR {
+		} else {
 			tarr := bytes.NewReader(pulledBlob)
 
 			gzipReader, err := gzip.NewReader(tarr)
@@ -204,12 +211,6 @@ func BlobContent() fiber.Handler {
 				result = append(result, fileContent)
 			}
 			return c.JSON(result)
-		} else if t == TARDOWNLOAD {
-			c.Set("Content-Type", "application/x-tar")
-			c.Set("Content-Disposition", "attachment; filename=file.tar")
-
-			return c.Send(pulledBlob)
 		}
-		return nil
 	}
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  {{ template "blobHeader" }}
+  <body>
+    {{ template "navbar" }}
+    <div class="content">
+      <div class="spinner">
+        <div class="skeletonLoader"></div>
+        <div class="skeletonLoader"></div>
+      </div>
+    </div>
+    {{template "footer"}}
+    <script>
+      const blobContent = document.querySelector(".content");
+      const loader = document.querySelector(".spinner");
+
+      async function blobData(URL) {
+        try {
+          const response = await fetch(URL);
+
+          if (!response.ok) {
+            throw new Error("Failed to fetch blob contents");
+          }
+          const data = await response.json();
+          return data;
+        } catch (err) {
+          return err;
+        }
+      }
+      document.addEventListener("DOMContentLoaded", async function () {
+        const pathname = window.location.pathname;
+        const blob = new URLSearchParams(window.location.search).get("layer");
+
+        if (!pathname.substring(pathname.lastIndexOf("/") + 1) || !blob) return;
+        const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
+        const matches = blob.match(regex);
+
+        try {
+          const data = await blobData(
+            `/api/blob?registry=${matches[1]}/&name=${matches[2]}&digest=${matches[3]}`
+          );
+
+          blobContent.innerHTML = `
+            <div id="blobHead">
+                <h4>${matches[0]}</h4>
+                <div class="buttonGroup">
+                <button type="button" class="btn btn-primary">Download</button>
+                <button type="button" class="btn btn-outline-secondary">Copy</button>
+                </div>
+            </div>
+            <div id="blobContent">
+            <pre>
+                ${prettyPrintJson.toHtml(data)}
+            </pre>
+            </div>
+            `;
+        } catch (err) {
+          blobContent.innerHTML = `
+            <div class="error">
+            <img src="./static/images/crossIcon.svg"/>
+            <div>Failed to fetch blob contents</div>
+            </div>`;
+          console.log(err);
+        }
+      });
+    </script>
+  </body>
+</html>
