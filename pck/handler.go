@@ -6,7 +6,6 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
-	// "fmt"
 	"io"
 
 	"github.com/gofiber/fiber/v2"
@@ -67,14 +66,11 @@ func Manifest() fiber.Handler {
 			Manifests: data["manifests"],
 			Configs:   data["config"],
 			Layers:    data["layers"],
-			Digest:    a.Digest,
+			Digest:    string(descriptor.Digest),
 		}
 
 		if mediaType, ok := data["mediaType"].(string); ok {
 			result.MediaType = mediaType
-		}
-		if digest, ok := data["digest"].(string); ok {
-			result.Digest = digest
 		}
 		return c.JSON(result)
 	}
