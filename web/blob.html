@@ -40,6 +40,15 @@
             `/api/blob?registry=${matches[1]}/&name=${matches[2]}&digest=${matches[3]}`
           );
 
+          if(!Object.keys(data).length) {
+            blobContent.innerHTML = `
+            <div class="error">
+            <img src="./static/images/infoIcon.svg"/>
+            <div>Blob contents not available</div>
+            </div>`;
+            return;
+          }
+
           blobContent.innerHTML = `
             <div id="blobHead">
                 <h4>${matches[0]}</h4>
@@ -60,7 +69,6 @@
             <img src="./static/images/crossIcon.svg"/>
             <div>Failed to fetch blob contents</div>
             </div>`;
-          console.log(err);
         }
       });
     </script>

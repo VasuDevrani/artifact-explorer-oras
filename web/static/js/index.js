@@ -574,12 +574,6 @@ class RightSideBlock {
         rsb.isReferrersPrepared = true;
         return;
       }
-      // const JSONview = `
-      //   <div class="view-item" id="jsonV">
-      //     <pre>
-      //       ${prettyPrintJson.toHtml({ Referrers: ar.Referrers })}
-      //     </pre>
-      //   </div>`;
       const treeV = `
       <div id="treeV" class="view-item active">
         <ul>${generateTree(ar.Referrers)}</ul>
