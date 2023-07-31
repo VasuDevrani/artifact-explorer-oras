@@ -280,7 +280,8 @@
 #manifestBlock .error,
 #blobBlock .info,
 #blobBlock .info,
-#layersBlock .error, #content_area .error {
+#layersBlock .error,
+#content_area .error {
   display: flex;
   flex-direction: column;
   margin-top: 10%;
@@ -339,59 +340,66 @@
   opacity: 1;
 }
 #referrers #treeV {
-  font-size: 20px;
-  line-height: 4rem;
+  font-size: var(--p-size);
+  line-height: 3rem;
   width: 100%;
   overflow: auto;
 }
-#treeV ul,
-#treeV li {
-  list-style: none;
-  padding-right: 10px;
-}
-#referrers #treeV > img {
-  width: 15px;
-}
-#treeV summary {
-  border: 1px solid var(--secondary-color);
-  padding: 0px 10px;
-  margin: 10px 0px;
-}
-#treeV summary {
-  position: relative;
-}
-#treeV summary:open {
-  color: orangered;
-}
-#treeV #digest {
-  color: var(--primary-color-light);
-}
-#treeV #digest:hover {
-  text-decoration: underline;
-  cursor: pointer;
-}
-#treeV summary::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  width: 1px;
-  height: calc(100% - 50%);
-  background-color: #ccc;
+
+#treeV img {
+  width: 20px;
+  margin-right: 10px;
 }
 
 #treeV ul {
-  margin-top: 0;
+  list-style: none;
+  width: fit-content;
+  position: relative;
   padding-left: 20px;
+}
+
+#treeV li {
   position: relative;
 }
 
-#treeV ul::before {
+#treeV li summary,
+#treeV li a {
+  border-top: 1px solid gray;
+  padding: 10px;
+  cursor: pointer;
+  position: relative;
+}
+
+#treeV li a {
+  text-decoration: none;
+  padding-bottom: 10px;
+  display: block;
+}
+
+#treeV a:hover {
+  text-decoration: underline;
+}
+
+/* Add vertical lines */
+#treeV li::before {
   content: "";
   position: absolute;
   top: 0;
   left: -10px;
-  width: 10px;
+  border-left: 1px solid gray;
   height: 100%;
-  border-left: 1px solid var(--secondary-color-light);
+}
+
+/* Add horizontal lines for child elements */
+#treeV li::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10px;
+  border-top: 1px solid gray;
+  width: 10px;
+}
+
+#treeV li details > ul {
+  margin-left: 10px;
 }

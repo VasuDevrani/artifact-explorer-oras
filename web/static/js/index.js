@@ -215,27 +215,27 @@ reg.addEventListener("change", () => (isRepoRegChanged = true));
 // ends
 
 // copyText
-document.addEventListener('click', (event) => {
+document.addEventListener("click", (event) => {
   const icon = event.target;
 
   if (icon.id === "copyIcon") {
-      icon.src = './static/images/tickIcon.svg';
-      const dataValue = icon.dataset.value;
+    icon.src = "./static/images/tickIcon.svg";
+    const dataValue = icon.dataset.value;
 
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = dataValue;
-      tempTextArea.style.position = 'fixed';
-      tempTextArea.style.opacity = 0;
-      document.body.appendChild(tempTextArea);
+    const tempTextArea = document.createElement("textarea");
+    tempTextArea.value = dataValue;
+    tempTextArea.style.position = "fixed";
+    tempTextArea.style.opacity = 0;
+    document.body.appendChild(tempTextArea);
 
-      tempTextArea.select();
-      tempTextArea.setSelectionRange(0, 99999);
-      document.execCommand('copy');
+    tempTextArea.select();
+    tempTextArea.setSelectionRange(0, 99999);
+    document.execCommand("copy");
 
-      document.body.removeChild(tempTextArea);
-      setTimeout(() => {
-          icon.src = './static/images/copyIcon.svg';
-      }, 500);
+    document.body.removeChild(tempTextArea);
+    setTimeout(() => {
+      icon.src = "./static/images/copyIcon.svg";
+    }, 500);
   }
 });
 // ends
@@ -290,7 +290,9 @@ function generateTree(treeData) {
     html += `
       <li>
         <details>
-          <summary>${node.ref.artifactType}</summary>
+          <summary> <img src="./static/images/githubColor.svg"/>${
+            node.ref.artifactType
+          }</summary>
           <ul>
             <li id="digest"><a href="/artifact?image=${reg.value}/${
       repo.value
@@ -518,6 +520,8 @@ class RightSideBlock {
           .forEach((digest) =>
             digest.addEventListener("click", async function (event) {
               event.preventDefault();
+              const d = digest.textContent.trim();
+              tag.value = d;
               const artifactUrl = `?image=${reg.value}/${repo.value}${
                 !tagList || !tagList.includes(tag.value) ? "@" : ":"
               }${tag.value}`;
@@ -533,8 +537,6 @@ class RightSideBlock {
                 return;
               }
               event.target.classList.add("handled");
-              const d = digest.textContent.trim();
-              tag.value = d;
               rsb.isManifestPrepared = false;
               try {
                 await fetchTagList();
@@ -647,9 +649,6 @@ class RightSideBlock {
           <a class="item active view aa" onclick='switchView("treeV", "referrers", "aa")'>
             TREE VIEW
           </a>
-          <div class="item">
-            <div class="ui primary button">DOWNLOAD</div>
-          </div>
         </div>
         </div>
         ${treeV}
@@ -959,15 +958,13 @@ document.addEventListener("DOMContentLoaded", async function () {
   const pathname = window.location.pathname;
   const image = new URLSearchParams(window.location.search).get("image");
 
-  if (!image) return;
-  const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
+  if (!pathname.substring(pathname.lastIndexOf("/") + 1) || !image) return;
+  const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
   const matches = image.match(regex);
 
   reg.value = `${matches[1]}`;
   repo.value = matches[2];
   tag.value = matches[3];
-
-  if (!matches[3]) tag.value = "latest";
 
   artifact.classList.remove("hide");
   artifact.classList.add("show");
