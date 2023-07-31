@@ -351,23 +351,38 @@ function downloadManifest() {
   dwnBtn.textContent = "DOWNLOAD";
 }
 
+function addHyperlinks() {
+  const jsonContent = document.getElementById("manifestJson");
+  const textNodes = jsonContent.childNodes;
+
+  const regex = /"sha256:[a-f0-9]{64}"/g;
+  const htmlContent = manifestJson.innerHTML;
+
+  const updatedHtmlContent = htmlContent.replace(regex, (match) => {
+    const sha256Value = match.slice(1, -1);
+    return `<span id="jsonDigest">${match}</span>`;
+  });
+  manifestJson.innerHTML = updatedHtmlContent;
+  return;
+}
+
 function blockTemplate(title, table, json, views) {
   return `
     <div id=${views.id}>
     <div class="header">
     <h1>${title}</h1>
     <div class="ui tabular menu">
-      <a class="item active view aa" onclick='switchView("table", "${
+      ${
+        json &&
+        `<a class="item ${json && "active"} view bb" onclick='switchView("jsonV", "${views.id}","bb")'>
+        JSON VIEW
+      </a>`
+      }
+      <a class="item ${!json && "active"} view aa" onclick='switchView("table", "${
         views.id
       }", "aa")'>
         TABLE VIEW
       </a>
-      ${
-        json &&
-        `<a class="item view bb" onclick='switchView("jsonV", "${views.id}","bb")'>
-        JSON VIEW
-      </a>`
-      }
       ${
         views.id === "manifestTable"
           ? `<div class="item">
@@ -377,11 +392,12 @@ function blockTemplate(title, table, json, views) {
       }
     </div>
     </div>
-    ${table}
     ${json}
+    ${table}
     </div>
   `;
 }
+
 class RightSideBlock {
   contructor() {
     this.isManifestPrepared = false;
@@ -479,7 +495,7 @@ class RightSideBlock {
             </tr>`;
         });
         const table = `
-          <div class="view-item active" id="table">
+          <div class="view-item" id="table">
           <table class="ui fixed single line celled table">
           <thead>
           <tr>
@@ -495,8 +511,8 @@ class RightSideBlock {
           </div>`;
 
         const JSONview = `
-          <div class="view-item" id="jsonV">
-          <pre>
+          <div class="view-item active" id="jsonV">
+          <pre id="manifestJson">
             ${prettyPrintJson.toHtml({ Manifests: ar.Manifests })}
           </pre>
           </div>
@@ -515,12 +531,14 @@ class RightSideBlock {
             item.classList.add("active");
           });
         });
-        document
-          .querySelectorAll("#manifestTable table #digest #digest")
+        addHyperlinks();
+        [...document
+          .querySelectorAll("#manifestTable table #digest #digest"), ...document.querySelectorAll("#jsonDigest")]
           .forEach((digest) =>
             digest.addEventListener("click", async function (event) {
               event.preventDefault();
-              const d = digest.textContent.trim();
+              let d = digest.textContent.trim();
+              d = d.replace(/^"(.*)"$/, '$1');
               tag.value = d;
               const artifactUrl = `?image=${reg.value}/${repo.value}${
                 !tagList || !tagList.includes(tag.value) ? "@" : ":"
@@ -540,7 +558,7 @@ class RightSideBlock {
               rsb.isManifestPrepared = false;
               try {
                 await fetchTagList();
-                await displayArtifactContents();
+                alterRightSide("layersBlock");
               } catch (error) {
                 console.error(error);
               }

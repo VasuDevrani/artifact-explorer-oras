@@ -236,6 +236,13 @@
   opacity: 0.9;
   color: var(--text-dark) !important;
 }
+#jsonDigest {
+  color: var(--text-link);
+  cursor: pointer;
+}
+#jsonDigest:hover {
+  text-decoration: underline;
+}
 #manifestDownload {
   background: var(--primary-color-light);
   padding: 10px 20px;
