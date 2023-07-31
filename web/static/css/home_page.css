@@ -1,56 +1,69 @@
-@import url("index.css");
+@import url("./index.css");
 
-/* hero */
 .hero {
-  background: url("../images/homeHeroBg.svg");
-  height: 600px;
+  background: url("../images/heroBg.svg");
+  height: 400px;
+  /* height: 100vh; */
+  /* background: linear-gradient(to bottom, #2e303e, transparent); */
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
   display: flex;
+  flex-direction: column;
   position: relative;
   justify-content: center;
-  gap: 5rem;
+  align-items: center;
 }
 .hero .heroHead {
-  width: 45%;
+  text-align: center;
+  transform: translateY(-30%);
 }
 .hero h1 {
-  margin-top: 140px;
   color: #ffff;
   font-weight: 700;
-  font-size: 66px;
+  font-size: var(--h1-size);
   z-index: 10;
 }
 .hero .heroHead p {
   color: var(--text-light);
-  font-size: 18px;
-  margin-top: -15px;
+  font-size: var(--h3-size);
+  margin-top: -5px;
 }
-.hero .form {
-  flex: 0.6;
-  display: flex;
-  gap: 20px;
-  flex-direction: column;
-  justify-content: center;
+.form {
+  width: 60vw;
+  transform: translateY(-40%);
+  background-color: #fff;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
 .artifactInputForm {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  width: 100%;
+  font-size: var(--p-size);
   justify-content: center;
+}
+.artifactInputForm > div {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
 }
 .artifactInputForm .ui.default.dropdown:not(.button) > .text,
 .ui.dropdown:not(.button) > .default.text {
-  color: var(--text-dark);
+  color: var(--secondary-color-light);
 }
 .artifactInputForm #digestortag {
   position: relative;
 }
-.artifactInputForm #registry {
+.artifactInputForm #registry,
+.artifactInputForm #repository {
   position: relative;
+  width: 100%;
 }
-.tagListDropdown, .registryDropdown {
+.tagListDropdown,
+.registryDropdown {
   position: absolute;
   top: 70px;
   border-radius: 10px;
@@ -73,7 +86,8 @@
 .tagListDropdown p:hover {
   background-color: var(--text-light);
 }
-.tagListDropdown .error, .tagListDropdown .info {
+.tagListDropdown .error,
+.tagListDropdown .info {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -82,7 +96,8 @@
   margin: auto;
   flex-direction: column;
 }
-.tagListDropdown .error img, .tagListDropdown .info img {
+.tagListDropdown .error img,
+.tagListDropdown .info img {
   width: 32px;
 }
 .registryDropdown .items {
@@ -101,42 +116,25 @@
 .artifactInputForm .form-control {
   font-size: medium;
 }
-.form-floating > .form-control-plaintext:focus,
-.form-floating > .form-control-plaintext:not(:placeholder-shown),
-.form-floating > .form-control:focus,
-.form-floating > .form-control:not(:placeholder-shown) {
-  padding-top: 3rem;
-  padding-bottom: 1.625rem;
-}
 .artifactInputForm .form-floating > label {
-  padding: 1.4rem 0.75rem;
+  font-size: var(--p-size);
 }
-.form-floating > .form-control,
-.form-floating > .form-control-plaintext {
-  padding: 2.3rem 0.75rem;
-}
-.artifactInputForm .ui.selection.dropdown > .delete.icon,
-.ui.selection.dropdown > .dropdown.icon,
-.ui.selection.dropdown > .search.icon {
-  top: 1.45rem;
-}
-.artifactInputForm .ui.selection.dropdown {
-  line-height: 2em;
-}
-.artifactInputForm .ui.dropdown>.text {
+.artifactInputForm .ui.dropdown > .text {
   display: flex;
   align-items: center;
 }
-.hero button {
+.form button {
   background-color: var(--secondary-color);
-  padding: 20px 25px;
+  padding: 10px 20px;
+  width: 60%;
+  margin: auto;
   text-transform: uppercase;
-  font-size: 18px;
+  font-size: var(--p-size);
   gap: 12px;
-  margin-top: 2rem;
+  margin-top: 1rem;
 }
 .hero button img {
-  width: 35px;
+  width: 30px;
 }
 .tagListDropdown .skeletonLoader,
 .registryDropdown .skeletonLoader {
@@ -145,6 +143,13 @@
   margin: 10px 0px;
   height: 50px;
 }
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown),
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown) {
+  padding-top: 2rem;
+  padding-bottom: 0.625rem;
+}
 /* main body */
 .main .rgs {
   display: flex;
@@ -152,10 +157,10 @@
   align-items: center;
   gap: 8rem;
   flex-wrap: wrap;
-  margin: 5rem;
+  margin: 2rem;
 }
 .main .rgs img {
-  width: 80px;
+  width: 65px;
 }
 .main .about,
 .main .features {
@@ -165,19 +170,109 @@
   margin: 5rem;
   flex-direction: column;
   text-align: center;
-  gap: 2rem;
+  gap: 1rem;
 }
 .main .about h1 {
   color: var(--primary-color);
+  font-size: var(--h2-size);
   font-weight: 600;
-  font-size: 35px;
 }
 .main .about p {
-  font-size: 17px;
-  width: 75%;
+  font-size: var(--p-size) !important;
+  width: 80%;
 }
 .main .features h1 {
   color: var(--primary-color);
   font-weight: 600;
-  font-size: 35px;
+  font-size: var(--h2-size);
+}
+/* main body */
+.features .cards {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    width: 90%;
+}
+.cardItem {
+    width: 100%;
+    border-radius: 30px;
+    border: 3px solid #E6E6E6;
+    background: #FFF;
+    padding: 20px;
+    text-align: left;
+}
+.cardItem img {
+    width: 40px;
+}
+.cardItem .icon {
+    padding: 15px;
+    border: 3px solid #E6E6E6;
+    background: #FFF;
+    border-radius: 30%;
+    /* display: flex; */
+    width: fit-content;
+}
+.cardItem h3{
+    font-size: var(--h3-size);
+    font-weight: 600;
+    margin-top: 10px;
+}
+.cardItem p {
+    font-size: var(--p-size);
+    margin-top: 40px;
+    color: var(--secondary-color);
+}
+.community {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-bottom: 3rem;
+}
+.community h1 {
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: var(--h2-size);
+}
+.community .connectOptions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3rem;
+    margin: 2rem;
+}
+.community .urls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    justify-content: space-between;
+    font-size: var(--p-size);
+}
+.community .urlItems {
+    display: flex;
+    gap: 10px;
+    box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 0.10);
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+}
+.community .urlItems img {
+    width: 25px;
+}
+.urlItems p {
+    font-weight: 700;
+}
+.community .calendarBlock {
+    background: var(--primary-gradient);
+    color: #fff;
+    padding: 20px;
+    border-radius: 20px;
+}
+.calendarBlock button {
+    margin: auto;
+    color: var(--primary-color);
+    padding: 10px 20px;
+    margin-top: 3rem;
 }

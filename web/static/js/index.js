@@ -1,5 +1,6 @@
 const reg = document.querySelector(".artifactInputForm #registry input");
 const repo = document.querySelector(".artifactInputForm #repository input");
+const tag = document.querySelector(".artifactInputForm #digestortag input");
 const artifact = document.querySelector("#content_area");
 const rows = document.querySelectorAll("#table_digest");
 
@@ -13,13 +14,6 @@ async function displayArtifactContents() {
     // rsb.isManifestPrepared = false;
     rsb.isReferrersPrepared = false;
     rsb.isBlobsPrepared = false;
-    document
-      .querySelectorAll("#content_area .main .leftSideBar ul li")
-      .forEach((item) => item.classList.remove("active"));
-    document
-      .querySelector("#content_area .main .leftSideBar #manifest")
-      .classList.add("active");
-
     alterRightSide("manifestBlock");
   } catch (error) {
     console.error(error);
@@ -37,7 +31,9 @@ function onSubmit(currentPage) {
     artifact.classList.add("show");
     rsb.isManifestPrepared = false;
     const artifactUrl = `?image=${reg.value}/${repo.value}${
-      !tagList || !tagList.includes(tag.value) ? "@" : ":"
+      (!tagList || !tagList.includes(tag.value)) && tag.value !== "latest"
+        ? "@"
+        : ":"
     }${tag.value}`;
     window.history.pushState(
       {
@@ -51,6 +47,37 @@ function onSubmit(currentPage) {
   }
 }
 // ends
+
+// handlePasteOfArtifactReference
+reg.addEventListener("paste", (event) => handlePastedString(event, "1"));
+repo.addEventListener("paste", (event) => handlePastedString(event, "2"));
+tag.addEventListener("paste", (event) => handlePastedString(event, "3"));
+
+function handlePastedString(event, id) {
+  const pastedText = event.clipboardData.getData("text/plain");
+  const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
+  const matches = pastedText.match(regex);
+
+  if (matches) {
+    const registry = matches[1] || "";
+    const repository = matches[2] || "";
+    let tagOrDigest = matches[3] || matches[5] || "";
+
+    if (!matches[3] && !matches[5]) tagOrDigest = "latest";
+
+    reg.value = registry;
+    repo.value = repository;
+    tag.value = tagOrDigest;
+  } else {
+    if (id === "1") reg.value = pastedText;
+    else if (id === "2") repo.value = pastedText;
+    else tag.value = pastedText;
+  }
+  isRepoRegChanged = true;
+  updateRegList();
+  fetchTagList();
+  event.preventDefault(); // Prevent the default paste behavior
+}
 
 // registry list dropdown javascript
 const regList = [
@@ -113,7 +140,6 @@ function updateRegList() {
 // ends
 
 // tag list javascript
-const tag = document.querySelector(".artifactInputForm #digestortag input");
 const tagListDropdown = document.querySelector(
   ".artifactInputForm .tagListDropdown"
 );
@@ -188,11 +214,39 @@ repo.addEventListener("change", () => (isRepoRegChanged = true));
 reg.addEventListener("change", () => (isRepoRegChanged = true));
 // ends
 
+// copyText
+document.addEventListener("click", (event) => {
+  const icon = event.target;
+
+  if (icon.id === "copyIcon") {
+    icon.src = "./static/images/tickIcon.svg";
+    const dataValue = icon.dataset.value;
+
+    const tempTextArea = document.createElement("textarea");
+    tempTextArea.value = dataValue;
+    tempTextArea.style.position = "fixed";
+    tempTextArea.style.opacity = 0;
+    document.body.appendChild(tempTextArea);
+
+    tempTextArea.select();
+    tempTextArea.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+
+    document.body.removeChild(tempTextArea);
+    setTimeout(() => {
+      icon.src = "./static/images/copyIcon.svg";
+    }, 500);
+  }
+});
+// ends
+
 // Sidebar Javascript
 const sidebarItems = document.querySelectorAll(
   "#content_area .main .leftSideBar ul li"
 );
 const blobSidebarItem = document.querySelector("#blobSidebarItem");
+const manifestSidebarItem = document.querySelector("#manifestSidebarItem");
+const layersSidebarItem = document.querySelector("#layersSidebarItem");
 
 sidebarItems.forEach((item) => {
   item.addEventListener("click", () => {
@@ -216,6 +270,9 @@ function alterRightSide(contentId) {
   if (contentId === "manifestBlock" && !rsb.isManifestPrepared) {
     rsb.prepareManifestsBlock();
   }
+  if (contentId === "layersBlock" && !rsb.isManifestPrepared) {
+    rsb.prepareManifestsBlock();
+  }
   if (contentId === "referrerBlock" && !rsb.isReferrersPrepared) {
     if (!reg.value || !repo.value || !tag.value) return;
     rsb.prepareReferrersBlock();
@@ -233,7 +290,9 @@ function generateTree(treeData) {
     html += `
       <li>
         <details>
-          <summary>${node.ref.artifactType}</summary>
+          <summary> <img src="./static/images/githubColor.svg"/>${
+            node.ref.artifactType
+          }</summary>
           <ul>
             <li id="digest"><a href="/artifact?image=${reg.value}/${
       repo.value
@@ -266,21 +325,56 @@ function switchView(contentId, elementId, headClass) {
   selectedHead.classList.add("active");
 }
 
+function downloadManifest() {
+  const dwnBtn = document.querySelector("#manifestDownload");
+
+  dwnBtn.textContent = "loading...";
+  const jsonString = JSON.stringify(
+    {
+      artifact: ar.Artifact,
+      digest: ar.Digest,
+      manifest: [...ar.Manifests],
+    },
+    null,
+    2
+  );
+
+  const blob = new Blob([jsonString], { type: "application/json" });
+  const downloadLink = document.createElement("a");
+  downloadLink.href = URL.createObjectURL(blob);
+  downloadLink.download = "manifests.json";
+
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+
+  document.body.removeChild(downloadLink);
+  dwnBtn.textContent = "DOWNLOAD";
+}
+
 function blockTemplate(title, table, json, views) {
   return `
     <div id=${views.id}>
     <div class="header">
     <h1>${title}</h1>
     <div class="ui tabular menu">
-      <a class="item active view aa" onclick='switchView("table", "${views.id}", "aa")'>
+      <a class="item active view aa" onclick='switchView("table", "${
+        views.id
+      }", "aa")'>
         TABLE VIEW
       </a>
-      <a class="item view bb" onclick='switchView("jsonV", "${views.id}","bb")'>
+      ${
+        json &&
+        `<a class="item view bb" onclick='switchView("jsonV", "${views.id}","bb")'>
         JSON VIEW
-      </a>
-      <div class="item">
-        <div class="ui primary button">DOWNLOAD</div>
-      </div>
+      </a>`
+      }
+      ${
+        views.id === "manifestTable"
+          ? `<div class="item">
+        <button onclick="downloadManifest()" id="manifestDownload">DOWNLOAD</button>
+      </div>`
+          : ""
+      }
     </div>
     </div>
     ${table}
@@ -297,18 +391,26 @@ class RightSideBlock {
 
   prepareMetaData() {
     let inp = document.querySelectorAll("#content_area .metaData .ui input");
+    let copyIcons = document.querySelectorAll(
+      "#content_area .metaData #copyIcon"
+    );
     inp[0].value = ar.Artifact ? ar.Artifact : "not available";
+    copyIcons[0].setAttribute("data-value", ar.Artifact || "");
     inp[1].value = ar.Digest ? ar.Digest : "not available";
+    copyIcons[1].setAttribute("data-value", ar.Digest || "");
     inp[2].value = ar.MediaType ? ar.MediaType : "not available";
+    copyIcons[2].setAttribute("data-value", ar.MediaType || "");
   }
 
   async prepareManifestsBlock() {
     if (this.isManifestPrepared) return;
     const b1 = document.querySelector("#manifestBlock");
+    const b2 = document.querySelector("#layersBlock");
     const loader = document.querySelector(
       "#content_area .main .rightContent .loadingBlock"
     );
     b1.innerHTML = "";
+    b2.innerHTML = "";
 
     loader.classList.remove("spinner");
     loader.classList.add("loader");
@@ -322,7 +424,37 @@ class RightSideBlock {
       loader.classList.remove("loader");
       loader.classList.add("spinner");
       rsb.prepareMetaData();
-      if (!ar.Manifests && !ar.Layers && !ar.Configs) {
+
+      if (!ar.Manifests) {
+        manifestSidebarItem.classList.remove("show");
+        manifestSidebarItem.classList.add("hide");
+        manifestSidebarItem.classList.remove("active");
+        layersSidebarItem.classList.add("active");
+      } else {
+        manifestSidebarItem.classList.remove("hide");
+        manifestSidebarItem.classList.add("show");
+        manifestSidebarItem.classList.add("active");
+      }
+      if (!ar.Layers) {
+        layersSidebarItem.classList.remove("show");
+        layersSidebarItem.classList.add("hide");
+      } else {
+        layersSidebarItem.classList.remove("hide");
+        layersSidebarItem.classList.add("show");
+      }
+      if (!ar.Subjects && !ar.Configs) {
+        blobSidebarItem.classList.remove("show");
+        blobSidebarItem.classList.add("hide");
+      } else {
+        blobSidebarItem.classList.remove("hide");
+        blobSidebarItem.classList.add("show");
+      }
+
+      if (!ar.Manifests && !ar.Configs && !ar.Layers && !ar.Subjects) {
+        manifestSidebarItem.classList.remove("hide");
+        manifestSidebarItem.classList.add("show");
+        manifestSidebarItem.classList.add("active");
+
         b1.innerHTML = `
         <div class="error">
           <img src="./static/images/crossIcon.svg"/>
@@ -331,13 +463,6 @@ class RightSideBlock {
         rsb.isManifestPrepared = true;
       }
 
-      if (!ar.Layers && !ar.Configs) {
-        blobSidebarItem.classList.remove("show");
-        blobSidebarItem.classList.add("hide");
-      } else {
-        blobSidebarItem.classList.remove("hide");
-        blobSidebarItem.classList.add("show");
-      }
       if (ar.Manifests) {
         let records = "";
         ar.Manifests.forEach((item, ind) => {
@@ -347,7 +472,7 @@ class RightSideBlock {
               <td>${item.size}</td>
               <td colspan="3" id="digest">
               <div id="digest"> ${item.digest} </div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${item.digest}">
               </td>
               <td colspan="2">${item.platform?.architecture}</td>
               <td>${item.platform?.os}</td>
@@ -391,10 +516,12 @@ class RightSideBlock {
           });
         });
         document
-          .querySelectorAll("#manifestTable table #digest")
+          .querySelectorAll("#manifestTable table #digest #digest")
           .forEach((digest) =>
             digest.addEventListener("click", async function (event) {
               event.preventDefault();
+              const d = digest.textContent.trim();
+              tag.value = d;
               const artifactUrl = `?image=${reg.value}/${repo.value}${
                 !tagList || !tagList.includes(tag.value) ? "@" : ":"
               }${tag.value}`;
@@ -410,8 +537,6 @@ class RightSideBlock {
                 return;
               }
               event.target.classList.add("handled");
-              const d = digest.textContent.trim();
-              tag.value = d;
               rsb.isManifestPrepared = false;
               try {
                 await fetchTagList();
@@ -435,7 +560,7 @@ class RightSideBlock {
               <a href="/blob?layer=${reg.value}/${repo.value}@${item.digest}" target="_blank">
               ${item.digest}
               </a></div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${item.digest}">
               </td>
             </tr>`;
         });
@@ -453,14 +578,7 @@ class RightSideBlock {
           </table>
           </div>`;
 
-        const JSONview = `
-          <div class="view-item" id="jsonV">
-          <pre>
-            ${prettyPrintJson.toHtml({ Layers: ar.Layers })}
-          </pre>
-          </div>
-        `;
-        b1.innerHTML += blockTemplate("Layers", table, JSONview, {
+        b2.innerHTML += blockTemplate("Layers", table, "", {
           id: "layersTable",
         });
 
@@ -475,65 +593,10 @@ class RightSideBlock {
           });
         });
       }
-
-      if (ar.Configs) {
-        let Configs = [];
-        if (!Array.isArray(ar.Configs)) {
-          Configs.push(ar.Configs);
-        } else {
-          Configs = ar.Configs;
-        }
-        let records = "";
-        Configs.forEach((item, ind) => {
-          records += `
-            <tr>
-              <td colspan="2">${item.mediaType}</td>
-              <td>${item.size}</td>
-              <td colspan="4" id="digest">
-              <div id="digest"><a href="/blob?layer=${reg.value}/${repo.value}@${item.digest}" target="_blank">
-              ${item.digest}
-              </a></div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
-              </td>
-            </tr>`;
-        });
-        const table = `
-          <div class="view-item active" id="table">
-          <table class="ui fixed single line celled table">
-          <thead>
-          <tr>
-            <th scope="col" colspan="2">Mediatype</th>
-            <th scope="col">Size</th>
-            <th scope="col" colspan="4">Digest</th>
-          </tr>
-          </thead>
-          ${records}
-          </table>
-          </div>`;
-
-        const JSONview = `
-          <div class="view-item" id="jsonV">
-          <pre>
-            ${prettyPrintJson.toHtml({ Configs })}
-          </pre>
-          </div>
-        `;
-        b1.innerHTML += blockTemplate("Configs", table, JSONview, {
-          id: "configsTable",
-        });
-
-        const topBar = document.querySelectorAll(
-          "#configsTable .header .menu .view"
-        );
-
-        topBar?.forEach((item) => {
-          item.addEventListener("click", () => {
-            topBar?.forEach((item) => item.classList.remove("active"));
-            item.classList.add("active");
-          });
-        });
-      }
       rsb.isManifestPrepared = true;
+      if (!ar.Manifests && ar.Layers) {
+        alterRightSide("layersBlock");
+      }
     } catch (err) {
       b1.innerHTML = `
         <div class="error">
@@ -586,9 +649,6 @@ class RightSideBlock {
           <a class="item active view aa" onclick='switchView("treeV", "referrers", "aa")'>
             TREE VIEW
           </a>
-          <div class="item">
-            <div class="ui primary button">DOWNLOAD</div>
-          </div>
         </div>
         </div>
         ${treeV}
@@ -667,6 +727,15 @@ class RightSideBlock {
           }
         });
       }
+      if (ar.Subjects) {
+        ar.Subjects.forEach((item) => {
+          if (blobs[item.mediaType]) {
+            blobs[item.mediaType].push(item);
+          } else {
+            blobs[item.mediaType] = [item];
+          }
+        });
+      }
       if (ar.Referrers) {
         ar.Referrers.forEach((item) => {
           if (blobs[item.ref.mediaType]) {
@@ -705,7 +774,7 @@ class RightSideBlock {
               <a href="/blob?layer=${reg.value}/${repo.value}@${b.digest}" target="_blank"> 
               ${b.digest} 
               </a></div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${b.digest}">
               </td>
             </tr>`;
         });
@@ -726,14 +795,14 @@ class RightSideBlock {
 
       html = `<div class="view-item active" id="table">${html}</div>`;
 
-      const JSONview = `
-          <div class="view-item" id="jsonV">
-          <pre>
-            ${prettyPrintJson.toHtml({ Blobs: blobs })}
-          </pre>
-          </div>
-        `;
-      blobView.innerHTML += blockTemplate("Artifact Blobs", html, JSONview, {
+      // const JSONview = `
+      //     <div class="view-item" id="jsonV">
+      //     <pre>
+      //       ${prettyPrintJson.toHtml({ Blobs: blobs })}
+      //     </pre>
+      //     </div>
+      //   `;
+      blobView.innerHTML += blockTemplate("Artifact Blobs", html, "", {
         id: "blobTable",
       });
 
@@ -773,6 +842,7 @@ class Artifact {
     this.Configs = null;
     this.Layers = null;
     this.Blobs = null;
+    this.Subjects = null;
     this.Referrers = null;
   }
 
@@ -780,7 +850,10 @@ class Artifact {
     try {
       const response = await fetch(
         `/api/artifact?registry=${artifact.registry}&name=${artifact.repo}&${
-          !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
+          (!tagList || !tagList.includes(artifact.tag)) &&
+          tag.value !== "latest"
+            ? "digest"
+            : "tag"
         }=${artifact.tag}`
       );
 
@@ -794,6 +867,7 @@ class Artifact {
       this.Manifests = data.Manifests;
       this.Layers = data.Layers;
       this.Digest = data.Digest;
+      this.Subjects = data.Subjects;
 
       return null;
     } catch (err) {
@@ -805,6 +879,7 @@ class Artifact {
       this.Layers = null;
       this.Blobs = null;
       this.Referrers = null;
+      this.Subjects = null;
       return err;
     }
   }
@@ -813,7 +888,10 @@ class Artifact {
     try {
       const response = await fetch(
         `/api/referrers?registry=${artifact.registry}/&name=${artifact.repo}&${
-          !tagList || !tagList.includes(artifact.tag) ? "digest" : "tag"
+          (!tagList || !tagList.includes(artifact.tag)) &&
+          tag.value !== "latest"
+            ? "digest"
+            : "tag"
         }=${artifact.tag}`
       );
 

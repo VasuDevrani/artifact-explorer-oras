@@ -6,10 +6,8 @@
 
     <!-- hero form -->
     <div class="hero">
-      <div class="hero_about"></div>
       <div class="form">
-        <h1>Enter artifact details</h1>
-        {{template "form"}}
+        {{ template "form" }}
         <button onclick='onSubmit("artifact")'>
           <div class="icon">
             <img src="./static/images/downArrow.svg" alt="" />
@@ -26,28 +24,41 @@
         <div class="ui labeled input">
           <div class="ui label">Artifact Name:</div>
           <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon">
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
         </div>
         <div class="ui labeled input">
           <div class="ui label">Content-Digest:</div>
           <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon">
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
         </div>
         <div class="ui labeled input">
           <div class="ui label">MediaType:</div>
           <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon">
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
         </div>
       </div>
 
       <div class="main">
         <div class="leftSideBar">
           <ul>
-            <li class="active" onclick="alterRightSide('manifestBlock')" id="manifest">
-              Contents
+            <li
+              class="active show"
+              onclick="alterRightSide('manifestBlock')"
+              id="manifestSidebarItem"
+            >
+              Manifests
+            </li>
+            <li id="layersSidebarItem" onclick="alterRightSide('layersBlock')" class="hide">
+              Layers
             </li>
             <li onclick="alterRightSide('referrerBlock')">Referrers</li>
-            <li onclick="alterRightSide('blobBlock')" id="blobSidebarItem" class="hide">Layers</li>
+            <li
+              onclick="alterRightSide('blobBlock')"
+              id="blobSidebarItem"
+              class="hide"
+            >
+              Contents
+            </li>
             <!-- <li onclick="alterRightSide('othersBlock')">Others</li> -->
           </ul>
         </div>
@@ -61,6 +72,7 @@
           <div id="manifestBlock" class="contentBlock active">
             Nothing to show
           </div>
+          <div id="layersBlock" class="contentBlock">Nothing to show</div>
           <div id="referrerBlock" class="contentBlock">Nothing to show</div>
           <div id="blobBlock" class="contentBlock">Nothing to show</div>
           <!-- <div id="othersBlock" class="contentBlock">Nothing to show</div> -->

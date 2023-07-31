@@ -66,11 +66,9 @@ func Manifest() fiber.Handler {
 			Manifests: data["manifests"],
 			Configs:   data["config"],
 			Layers:    data["layers"],
+			Subjects:  data["subjects"],
 			Digest:    string(descriptor.Digest),
-		}
-
-		if mediaType, ok := data["mediaType"].(string); ok {
-			result.MediaType = mediaType
+			MediaType: string(descriptor.MediaType),
 		}
 		return c.JSON(result)
 	}
@@ -164,9 +162,19 @@ func BlobContent() fiber.Handler {
 			errResponse := Err("Failed to fetch contents of artifact blob", fiber.StatusInternalServerError)
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
-		if t == TARDOWNLOAD {
-			c.Set("Content-Type", "application/x-tar")
-			c.Set("Content-Disposition", "attachment; filename=file.tar")
+		if t == DOWNLOAD {
+			filename := "file"
+			contentType := ""
+
+			if isJSON(pulledBlob) {
+				filename += ".json"
+				contentType = "application/json"
+			} else {
+				filename += ".tar"
+				contentType = "application/x-tar"
+			}
+			c.Set("Content-Type", contentType)
+			c.Set("Content-Disposition", "attachment; filename="+filename)
 
 			return c.Send(pulledBlob)
 		}
@@ -180,7 +188,15 @@ func BlobContent() fiber.Handler {
 				errResponse := Err("Failed to fetch contents of artifact blob", fiber.StatusNotFound)
 				return c.Status(errResponse.StatusCode).JSON(errResponse)
 			}
-			return c.JSON(data)
+
+			result := Blob{
+				Artifact:      a.Name,
+				ContentLength: descriptor.Size,
+				Digest:        string(descriptor.Digest),
+				ContentType:   string(descriptor.MediaType),
+				Data:          data,
+			}
+			return c.JSON(result)
 		} else {
 			tarr := bytes.NewReader(pulledBlob)
 
@@ -190,7 +206,7 @@ func BlobContent() fiber.Handler {
 			}
 
 			tarReader := tar.NewReader(gzipReader)
-			result := []string{}
+			data := []string{}
 			for {
 				header, err := tarReader.Next()
 				if err == io.EOF {
@@ -208,7 +224,14 @@ func BlobContent() fiber.Handler {
 				}
 
 				fileContent := buffer.String()
-				result = append(result, fileContent)
+				data = append(data, fileContent)
+			}
+			result := Blob{
+				Artifact:      a.Name,
+				ContentLength: descriptor.Size,
+				Digest:        string(descriptor.Digest),
+				ContentType:   string(descriptor.MediaType),
+				Data:          data,
 			}
 			return c.JSON(result)
 		}

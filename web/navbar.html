@@ -1,25 +1,32 @@
 {{ define "navbar" }}
 <nav>
-  <ul>
-    <li>
-      <a href="/"><img src="./static/images/orasLogo.svg" alt="ORAS logo" /></a>
-    </li>
-    <li><a href="#">Artifact</a></li>
-    <li><a href="#">Blog</a></li>
-  </ul>
-  <ul>
-    <li>
-      <a href="#"><img src="./static/images/darkMode.svg" alt="ORAS logo" /></a>
-    </li>
-    <li>
-      <a href="#"><img src="./static/images/slack.svg" alt="ORAS logo" /></a>
-    </li>
-    <li>
-      <a href="#"><img src="./static/images/twitter.svg" alt="ORAS logo" /></a>
-    </li>
-    <li>
-      <a href="#"><img src="./static/images/github.svg" alt="ORAS logo" /></a>
-    </li>
-  </ul>
+  <div>
+    <ul>
+      <li>
+        <a href="/"
+          ><img src="./static/images/orasLogo.svg" alt="ORAS logo" id="logo"
+        /></a>
+      </li>
+      <li><a href="/artifact">Artifact</a></li>
+    </ul>
+    <ul>
+      <li>
+        <a href="#"
+          ><img src="./static/images/darkMode.svg" alt="ORAS logo"
+        /></a>
+      </li>
+      <li>
+        <a href="#"><img src="./static/images/slack.svg" alt="ORAS logo" /></a>
+      </li>
+      <li>
+        <a href="#"
+          ><img src="./static/images/twitter.svg" alt="ORAS logo"
+        /></a>
+      </li>
+      <li>
+        <a href="#"><img src="./static/images/github.svg" alt="ORAS logo" /></a>
+      </li>
+    </ul>
+  </div>
 </nav>
 {{ end }}
