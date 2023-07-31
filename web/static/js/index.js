@@ -214,6 +214,32 @@ repo.addEventListener("change", () => (isRepoRegChanged = true));
 reg.addEventListener("change", () => (isRepoRegChanged = true));
 // ends
 
+// copyText
+document.addEventListener('click', (event) => {
+  const icon = event.target;
+
+  if (icon.id === "copyIcon") {
+      icon.src = './static/images/tickIcon.svg';
+      const dataValue = icon.dataset.value;
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = dataValue;
+      tempTextArea.style.position = 'fixed';
+      tempTextArea.style.opacity = 0;
+      document.body.appendChild(tempTextArea);
+
+      tempTextArea.select();
+      tempTextArea.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+
+      document.body.removeChild(tempTextArea);
+      setTimeout(() => {
+          icon.src = './static/images/copyIcon.svg';
+      }, 500);
+  }
+});
+// ends
+
 // Sidebar Javascript
 const sidebarItems = document.querySelectorAll(
   "#content_area .main .leftSideBar ul li"
@@ -363,9 +389,15 @@ class RightSideBlock {
 
   prepareMetaData() {
     let inp = document.querySelectorAll("#content_area .metaData .ui input");
+    let copyIcons = document.querySelectorAll(
+      "#content_area .metaData #copyIcon"
+    );
     inp[0].value = ar.Artifact ? ar.Artifact : "not available";
+    copyIcons[0].setAttribute("data-value", ar.Artifact || "");
     inp[1].value = ar.Digest ? ar.Digest : "not available";
+    copyIcons[1].setAttribute("data-value", ar.Digest || "");
     inp[2].value = ar.MediaType ? ar.MediaType : "not available";
+    copyIcons[2].setAttribute("data-value", ar.MediaType || "");
   }
 
   async prepareManifestsBlock() {
@@ -438,7 +470,7 @@ class RightSideBlock {
               <td>${item.size}</td>
               <td colspan="3" id="digest">
               <div id="digest"> ${item.digest} </div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${item.digest}">
               </td>
               <td colspan="2">${item.platform?.architecture}</td>
               <td>${item.platform?.os}</td>
@@ -482,7 +514,7 @@ class RightSideBlock {
           });
         });
         document
-          .querySelectorAll("#manifestTable table #digest")
+          .querySelectorAll("#manifestTable table #digest #digest")
           .forEach((digest) =>
             digest.addEventListener("click", async function (event) {
               event.preventDefault();
@@ -526,7 +558,7 @@ class RightSideBlock {
               <a href="/blob?layer=${reg.value}/${repo.value}@${item.digest}" target="_blank">
               ${item.digest}
               </a></div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${item.digest}">
               </td>
             </tr>`;
         });
@@ -743,7 +775,7 @@ class RightSideBlock {
               <a href="/blob?layer=${reg.value}/${repo.value}@${b.digest}" target="_blank"> 
               ${b.digest} 
               </a></div>
-              <img src="./static/images/copyIcon.svg" id="copyIcon">
+              <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${b.digest}">
               </td>
             </tr>`;
         });

@@ -43,6 +43,7 @@
       const ins = document.querySelectorAll(".content .metaData input");
       const loader = document.querySelector(".spinner");
       const downloadBtn = document.querySelector(".buttonGroup > button");
+      const copyIcons = document.querySelectorAll("#copyIcon")
 
       let artifactParams = null;
 
@@ -107,11 +108,15 @@
           );
 
           ins[0].value = data.Artifact ? data.Artifact : "not available";
+          copyIcons[0].setAttribute("data-value", data.Artifact || "");
           ins[1].value = data.Digest ? data.Digest : "not available";
+          copyIcons[1].setAttribute("data-value", data.Digest || "");
           ins[2].value = data.ContentType ? data.ContentType : "not available";
+          copyIcons[2].setAttribute("data-value", data.ContentType || "");
           ins[3].value = data.ContentLength
             ? data.ContentLength
             : "not available";
+          copyIcons[3].setAttribute("data-value", data.ContentLength || "");
 
           loader.classList.add("hide");
           document.querySelector(".content").classList.remove("hide");
@@ -142,6 +147,30 @@
             </div>`;
         } finally {
           loader.classList.add("hide");
+        }
+      });
+
+      document.addEventListener("click", (event) => {
+        const icon = event.target;
+
+        if (icon.id === "copyIcon") {
+          icon.src = "./static/images/tickIcon.svg";
+          const dataValue = icon.dataset.value;
+
+          const tempTextArea = document.createElement("textarea");
+          tempTextArea.value = dataValue;
+          tempTextArea.style.position = "fixed";
+          tempTextArea.style.opacity = 0;
+          document.body.appendChild(tempTextArea);
+
+          tempTextArea.select();
+          tempTextArea.setSelectionRange(0, 99999);
+          document.execCommand("copy");
+
+          document.body.removeChild(tempTextArea);
+          setTimeout(() => {
+            icon.src = "./static/images/copyIcon.svg";
+          }, 500);
         }
       });
     </script>
