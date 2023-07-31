@@ -8,13 +8,19 @@
   --secondary-color-light: rgba(208, 205, 205, 0.82);
   --secondary-color: #303846;
   --secondary-color-dark: rgba(0, 0, 0, 0.39);
-  --text-light: #c9c7c7;
+  --text-light: #ebe9e9;
   --text-dark: #2e303e;
   --text-link: #007bff;
 
-  /* widths */
-  --breakpoint-mobile: 576px;
-  --breakpoint-tablet: 768px;
+  /* typography */
+  --h1-size: 40px;
+  --p-size: 16px;
+  --h2-size: 30px;
+  --h3-size: 20px;
+
+  /* screenwidths */
+  --breakpoint-mobile: 480px;
+  --breakpoint-tablet: 1024px;
 }
 
 * {
@@ -26,7 +32,8 @@
 
 body {
   overflow-x: hidden;
-  font-size: 16px;
+  font-size: var(--p-size);
+  min-height: 100vh;
 }
 
 a {
@@ -35,7 +42,7 @@ a {
 }
 button {
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: var(--text-light);
   display: flex;
   align-items: center;
@@ -50,11 +57,17 @@ button:active {
 /* navbar */
 nav {
   background: var(--primary-gradient);
-  padding: 13px 20px;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: center;
+}
+nav div {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  max-width: 1920px;
 }
 nav ul {
   list-style: none;
@@ -73,10 +86,15 @@ nav ul li a:hover {
   color: var(--text-light);
   cursor: pointer;
 }
+nav #logo {
+  height: 30px;
+}
 /* footer */
 .site-footer {
   background-color: #26272b;
   padding: 45px 0 20px;
+  /* position: absolute; */
+  width: 100%;
   font-size: 15px;
   line-height: 24px;
   color: #737373;
@@ -90,7 +108,7 @@ nav ul li a:hover {
 }
 .site-footer h6 {
   color: #fff;
-  font-size: 16px;
+  font-size: var(--p-size);
   text-transform: uppercase;
   margin-top: 5px;
   letter-spacing: 2px;
@@ -169,7 +187,7 @@ nav ul li a:hover {
 .social-icons a {
   background-color: #eceeef;
   color: #818a91;
-  font-size: 16px;
+  font-size: var(--p-size);
   display: inline-block;
   line-height: 44px;
   width: 44px;
@@ -213,12 +231,6 @@ nav ul li a:hover {
   }
 }
 /* others */
-.hide {
-  display: none;
-}
-.show {
-  display: flex;
-}
 .skeletonLoader {
   width: 100%;
   height: 100px;
@@ -239,4 +251,10 @@ nav ul li a:hover {
   100% {
     background-position: 200px 0;
   }
+}
+.hide {
+  display: none;
+}
+.show {
+  display: flex;
 }

@@ -3,17 +3,82 @@
   {{ template "blobHeader" }}
   <body>
     {{ template "navbar" }}
-    <div class="content">
-      <div class="spinner">
-        <div class="skeletonLoader"></div>
-        <div class="skeletonLoader"></div>
+    <div class="spinner">
+      <div class="skeletonLoader"></div>
+      <div class="skeletonLoader"></div>
+    </div>
+    <div class="content hide">
+      <div class="metaData">
+        <div class="ui labeled input">
+          <div class="ui label">Artifact Name:</div>
+          <input type="text" placeholder="not available" disabled />
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+        </div>
+        <div class="ui labeled input">
+          <div class="ui label">Content-Digest:</div>
+          <input type="text" placeholder="not available" disabled />
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+        </div>
+        <div class="ui labeled input">
+          <div class="ui label">Content-Type:</div>
+          <input type="text" placeholder="not available" disabled />
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+        </div>
+        <div class="ui labeled input">
+          <div class="ui label">Content-Length:</div>
+          <input type="text" placeholder="not available" disabled />
+          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+        </div>
       </div>
+      <div class="buttonGroup">
+        <button onclick="downloadBlob()">Download</button>
+        <!-- <button>Copy</button> -->
+      </div>
+      <div class="blobContent"></div>
     </div>
     {{template "footer"}}
     <script>
-      const blobContent = document.querySelector(".content");
+      const blobContent = document.querySelector(".content .blobContent");
+      const metaData = document.querySelector(".content .metaData");
+      const ins = document.querySelectorAll(".content .metaData input");
       const loader = document.querySelector(".spinner");
+      const downloadBtn = document.querySelector(".buttonGroup > button");
 
+      let artifactParams = null;
+
+      function downloadBlob() {
+        const apiURL = `/api/blob?registry=${artifactParams[1]}/&name=${artifactParams[2]}&digest=${artifactParams[3]}&type=download`;
+
+        downloadBtn.textContent = "loading...";
+        fetch(apiURL)
+          .then((response) => {
+            const contentDisposition = response.headers.get(
+              "Content-Disposition"
+            );
+            let filename = "file";
+            if (
+              contentDisposition &&
+              contentDisposition.indexOf("filename=") !== -1
+            ) {
+              filename = contentDisposition.split("filename=")[1].trim();
+            }
+
+            return response.blob().then((blob) => {
+              const downloadLink = document.createElement("a");
+              downloadLink.href = URL.createObjectURL(blob);
+              downloadLink.download = filename;
+
+              document.body.appendChild(downloadLink);
+              downloadLink.click();
+
+              document.body.removeChild(downloadLink);
+            });
+          })
+          .catch((error) => {
+            console.error("Error while fetching the file:", error);
+          })
+          .finally(() => (downloadBtn.textContent = "Download"));
+      }
       async function blobData(URL) {
         try {
           const response = await fetch(URL);
@@ -34,34 +99,40 @@
         if (!pathname.substring(pathname.lastIndexOf("/") + 1) || !blob) return;
         const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
         const matches = blob.match(regex);
+        artifactParams = matches;
 
         try {
           const data = await blobData(
             `/api/blob?registry=${matches[1]}/&name=${matches[2]}&digest=${matches[3]}`
           );
 
-          if(!Object.keys(data).length) {
+          ins[0].value = data.Artifact ? data.Artifact : "not available";
+          ins[1].value = data.Digest ? data.Digest : "not available";
+          ins[2].value = data.ContentType ? data.ContentType : "not available";
+          ins[3].value = data.ContentLength
+            ? data.ContentLength
+            : "not available";
+
+          loader.classList.add("hide");
+          document.querySelector(".content").classList.remove("hide");
+          console.log(data);
+          if (
+            (Array.isArray(data.Data) && !data.length) ||
+            !Object.keys(data.Data).length ||
+            data.ContentLength > 120000
+          ) {
             blobContent.innerHTML = `
             <div class="error">
             <img src="./static/images/infoIcon.svg"/>
-            <div>Blob contents not available</div>
+            <div>Cannot display blob contents</div>
             </div>`;
             return;
           }
 
           blobContent.innerHTML = `
-            <div id="blobHead">
-                <h4>${matches[0]}</h4>
-                <div class="buttonGroup">
-                <button type="button" class="btn btn-primary">Download</button>
-                <button type="button" class="btn btn-outline-secondary">Copy</button>
-                </div>
-            </div>
-            <div id="blobContent">
             <pre>
-                ${prettyPrintJson.toHtml(data)}
+                ${prettyPrintJson.toHtml(data.Data)}
             </pre>
-            </div>
             `;
         } catch (err) {
           blobContent.innerHTML = `
@@ -69,6 +140,8 @@
             <img src="./static/images/crossIcon.svg"/>
             <div>Failed to fetch blob contents</div>
             </div>`;
+        } finally {
+          loader.classList.add("hide");
         }
       });
     </script>

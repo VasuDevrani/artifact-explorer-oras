@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	TARDOWNLOAD = "tardownload"
+	DOWNLOAD = "download"
 	ATSYMBOL    = "@"
 	COLONSYMBOL = ":"
-)
+) 
 
 type Query map[string]string
 
@@ -24,6 +24,7 @@ type ArtifactContent struct {
 	Manifests interface{}
 	Configs   interface{}
 	Layers    interface{}
+	Subjects  interface{}
 }
 
 type Artifact struct {
@@ -35,13 +36,21 @@ type Artifact struct {
 }
 
 type Referrer struct {
-	Ref  v1.Descriptor `json:"ref"`
+	Ref   v1.Descriptor `json:"ref"`
 	Nodes []Referrer    `json:"nodes"`
 }
 
+type Blob struct {
+	Artifact      string
+	ContentLength int64
+	ContentType   string
+	Digest        string
+	Data          interface{}
+}
+
 type ErrorResponse struct {
-    StatusCode int    `json:"status"`
-    Message    string `json:"message"`
+	StatusCode int    `json:"status"`
+	Message    string `json:"message"`
 }
 
 func ArtifactFromQuery(q Query) Artifact {
@@ -78,7 +87,7 @@ func GenerateReferrerTree(repo *remote.Repository, name string, artifact string)
 		for _, referrer := range referrers {
 			nodes, _ := GenerateReferrerTree(repo, artifact+ATSYMBOL+string(referrer.Digest), artifact)
 			res := Referrer{
-				Ref:  referrer,
+				Ref:   referrer,
 				Nodes: nodes,
 			}
 

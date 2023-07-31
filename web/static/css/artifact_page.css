@@ -5,63 +5,41 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 4rem 2rem;
+  padding: 2rem;
   background: var(--primary-gradient);
-  width: 90vw;
   margin: auto;
-  margin: 2rem auto;
-  border-radius: 24px;
 }
-.hero .hero_about {
-  flex: 0.6;
+.form {
+  width: 60vw;
+  background-color: #fff;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.25);
 }
-.hero .form {
-  flex: 0.4;
-  padding: 40px 5%;
-  min-height: 50vh;
-  border-radius: 24px;
-  border: 2px solid var(--secondary-color-light);
-  box-shadow: 7px 7px 12px 0px rgba(0, 0, 0, 0.31);
+.artifactInputForm {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  width: 100%;
+  font-size: var(--p-size);
   justify-content: center;
-  font-size: 17px;
-  background-color: #ffff;
 }
-.hero .form .artifactInputForm {
+.artifactInputForm > div {
   display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  justify-content: center;
+  width: 100%;
+  gap: 2rem;
 }
-.hero .form h1 {
-  color: var(--text-dark);
-  font-size: 28px;
-  font-weight: 700;
-}
-.hero .form button {
-  background-color: var(--secondary-color);
-  height: 80px;
-  margin: auto;
-  padding: 0 2rem;
-  font-size: 17px;
-  font-weight: 400;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-top: 3rem;
-  color: #ffff;
-}
-.hero .form button .icon img {
-  width: 35px;
+.artifactInputForm .ui.default.dropdown:not(.button) > .text,
+.ui.dropdown:not(.button) > .default.text {
+  color: var(--secondary-color-light);
 }
 .artifactInputForm #digestortag {
   position: relative;
 }
-.artifactInputForm #registry {
+.artifactInputForm #registry,
+.artifactInputForm #repository {
   position: relative;
+  width: 100%;
 }
 .tagListDropdown,
 .registryDropdown {
@@ -88,8 +66,7 @@
   background-color: var(--text-light);
 }
 .tagListDropdown .error,
-.tagListDropdown .info,
-.registryDropdown .info {
+.tagListDropdown .info {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -99,8 +76,7 @@
   flex-direction: column;
 }
 .tagListDropdown .error img,
-.tagListDropdown .info img,
-.registryDropdown .info img {
+.tagListDropdown .info img {
   width: 32px;
 }
 .registryDropdown .items {
@@ -119,31 +95,25 @@
 .artifactInputForm .form-control {
   font-size: medium;
 }
-.form-floating > .form-control-plaintext:focus,
-.form-floating > .form-control-plaintext:not(:placeholder-shown),
-.form-floating > .form-control:focus,
-.form-floating > .form-control:not(:placeholder-shown) {
-  padding-top: 3rem;
-  padding-bottom: 1.625rem;
-}
 .artifactInputForm .form-floating > label {
-  padding: 1.4rem 0.75rem;
-}
-.form-floating > .form-control,
-.form-floating > .form-control-plaintext {
-  padding: 2.3rem 0.75rem;
-}
-.artifactInputForm .ui.selection.dropdown > .delete.icon,
-.ui.selection.dropdown > .dropdown.icon,
-.ui.selection.dropdown > .search.icon {
-  top: 1.45rem;
-}
-.artifactInputForm .ui.selection.dropdown {
-  line-height: 2em;
+  font-size: var(--p-size);
 }
 .artifactInputForm .ui.dropdown > .text {
   display: flex;
   align-items: center;
+}
+.form button {
+  background-color: var(--secondary-color);
+  padding: 10px 20px;
+  width: 60%;
+  margin: auto;
+  text-transform: uppercase;
+  font-size: var(--p-size);
+  gap: 12px;
+  margin-top: 1rem;
+}
+.hero button img {
+  width: 30px;
 }
 .tagListDropdown .skeletonLoader,
 .registryDropdown .skeletonLoader {
@@ -151,6 +121,13 @@
   transform: translateX(10px);
   margin: 10px 0px;
   height: 50px;
+}
+.form-floating > .form-control-plaintext:focus,
+.form-floating > .form-control-plaintext:not(:placeholder-shown),
+.form-floating > .form-control:focus,
+.form-floating > .form-control:not(:placeholder-shown) {
+  padding-top: 2rem;
+  padding-bottom: 0.625rem;
 }
 /* content area */
 #content_area {
@@ -161,7 +138,7 @@
   max-width: 1500px;
   margin: auto;
   gap: 1rem;
-  margin: 7rem auto;
+  margin: 4rem auto;
 }
 #content_area table #table_digest {
   color: var(--primary-color-light);
@@ -188,6 +165,12 @@
   flex-direction: row;
   margin-top: 2rem;
   gap: 3rem;
+}
+#content_area
+  .ui.labeled.input:not([class*="corner labeled"])
+  .label:first-child {
+  background: var(--primary-color-light);
+  color: white;
 }
 #content_area .main .leftSideBar {
   flex: 0.25;
@@ -253,23 +236,32 @@
   opacity: 0.9;
   color: var(--text-dark) !important;
 }
+#manifestDownload {
+  background: var(--primary-color-light);
+  padding: 10px 20px;
+  border-radius: 5px;
+}
 #manifestBlock table tr #digest,
-#blobBlock table tr #digest {
+#blobBlock table tr #digest,
+#layersBlock table tr #digest {
   color: var(--text-link);
   cursor: pointer;
   position: relative;
 }
 #manifestBlock table tr #digest div,
-#blobBlock table tr #digest {
+#blobBlock table tr #digest div,
+#layersBlock table tr #digest div {
   overflow: hidden;
   text-overflow: ellipsis;
 }
 #manifestBlock table tr #digest:hover div,
-#blobBlock table tr #digest:hover div {
+#blobBlock table tr #digest:hover div,
+#layersBlock table tr #digest:hover div {
   width: 92%;
 }
 #manifestBlock table tr td #copyIcon,
-#blobBlock table tr td #copyIcon {
+#blobBlock table tr td #copyIcon,
+#layersBlock table tr td #copyIcon {
   width: 13px;
   position: absolute;
   top: 18px;
@@ -279,14 +271,16 @@
   visibility: hidden;
 }
 #manifestBlock table tr #digest:hover #copyIcon,
-#blobBlock table tr #digest:hover #copyIcon {
+#blobBlock table tr #digest:hover #copyIcon,
+#layersBlock table tr #digest:hover #copyIcon {
   visibility: visible;
 }
 #referrerBlock .info,
 #referrerBlock .error,
 #manifestBlock .error,
 #blobBlock .info,
-#blobBlock .info {
+#blobBlock .info,
+#layersBlock .error, #content_area .error {
   display: flex;
   flex-direction: column;
   margin-top: 10%;
@@ -299,7 +293,8 @@
 #referrerBlock .error img,
 #manifestBlock .error img,
 #blobBlock .error img,
-#blobBlock .info img {
+#blobBlock .info img,
+#layersBlock .info img {
   width: 40px;
 }
 #manifestTable,
@@ -332,7 +327,7 @@
 }
 #jsonV > pre > span:nth-child(1) {
   display: inline-block;
-  margin-left: -90px;
+  margin-left: -107px;
 }
 
 #manifestTable .view-item.active,
