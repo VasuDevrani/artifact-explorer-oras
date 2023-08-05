@@ -480,7 +480,7 @@ class RightSideBlock {
         { title: "Manifests", data: ar.Manifests },
         { title: "Layers", data: ar.Layers },
         { title: "Configs", data: ar.Configs },
-        { title: "Subjects", data: ar.Subjects },
+        { title: "Subject", data: ar.Subject },
       ];
 
       let tableView = sections
@@ -609,7 +609,7 @@ class Artifact {
     this.Manifests = null;
     this.Configs = null;
     this.Layers = null;
-    this.Subjects = null;
+    this.Subject = null;
     this.Referrers = null;
     this.Manifest = null;
   }
@@ -632,7 +632,7 @@ class Artifact {
       this.Manifests = data.Manifests;
       this.Layers = data.Layers;
       this.Digest = data.Digest;
-      this.Subjects = data.Subjects;
+      this.Subject = data.Subject;
       this.Manifest = data.Manifest;
 
       return null;
@@ -643,7 +643,7 @@ class Artifact {
       this.Manifests = null;
       this.Configs = null;
       this.Layers = null;
-      this.Subjects = null;
+      this.Subject = null;
       this.Manifest = null;
       return err;
     }
