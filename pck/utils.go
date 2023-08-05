@@ -21,6 +21,7 @@ type ArtifactContent struct {
 	Artifact  string
 	MediaType string
 	Digest    string
+	Manifest  interface{}
 	Manifests interface{}
 	Configs   interface{}
 	Layers    interface{}

@@ -63,6 +63,7 @@ func Manifest() fiber.Handler {
 
 		result := ArtifactContent{
 			Artifact:  a.Name,
+			Manifest:  data,
 			Manifests: data["manifests"],
 			Configs:   data["config"],
 			Layers:    data["layers"],
