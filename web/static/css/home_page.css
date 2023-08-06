@@ -69,11 +69,16 @@
   border-radius: 10px;
   width: 100%;
   z-index: 10;
-  height: 165px;
   background: #ffff;
   box-shadow: 2px 7px 10px 0px rgba(0, 0, 0, 0.31);
   flex-direction: column;
   overflow: auto;
+}
+.registryDropdown {
+  height: fit-content;
+}
+.tagListDropdown {
+  height: 165px;
 }
 .tagListDropdown .items {
   cursor: pointer;

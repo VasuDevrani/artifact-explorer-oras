@@ -63,10 +63,11 @@ func Manifest() fiber.Handler {
 
 		result := ArtifactContent{
 			Artifact:  a.Name,
+			Manifest:  data,
 			Manifests: data["manifests"],
 			Configs:   data["config"],
 			Layers:    data["layers"],
-			Subjects:  data["subjects"],
+			Subjects:  data["subject"],
 			Digest:    string(descriptor.Digest),
 			MediaType: string(descriptor.MediaType),
 		}
@@ -235,5 +236,32 @@ func BlobContent() fiber.Handler {
 			}
 			return c.JSON(result)
 		}
+	}
+}
+
+func Repos() fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		a := ArtifactFromQuery(c.Queries())
+		reg, err := remote.NewRegistry(a.Registry)
+		if(err != nil) {
+			errResponse := Err("Registry does not exist", fiber.StatusNotFound)
+			return c.Status(errResponse.StatusCode).JSON(errResponse)
+		}
+		ctx := context.Background()
+
+		var repoList []string
+		err = reg.Repositories(ctx, "", func(repos []string) error {
+			for _, repo := range repos {
+				repoList = append(repoList, repo)
+			}
+			return nil
+		})
+
+		if(err != nil) {
+			errResponse := Err("Failed to fetch repositories", fiber.StatusNotFound)
+			return c.Status(errResponse.StatusCode).JSON(errResponse)
+		}
+
+		return c.JSON(repoList)
 	}
 }

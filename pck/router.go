@@ -23,6 +23,8 @@ func AppRouter(app fiber.Router) {
 	
 	app.Get("/api/artifact", Manifest())
 
+	app.Get("/api/repos", Repos())
+
 	app.Get("*", func(c *fiber.Ctx) error {
         return c.Render("404", nil)
     })

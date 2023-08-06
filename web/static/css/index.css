@@ -33,7 +33,7 @@
 body {
   overflow-x: hidden;
   font-size: var(--p-size);
-  min-height: 100vh;
+  height: 100%;
 }
 
 a {

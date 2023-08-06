@@ -46,20 +46,9 @@
               onclick="alterRightSide('manifestBlock')"
               id="manifestSidebarItem"
             >
-              Manifests
-            </li>
-            <li id="layersSidebarItem" onclick="alterRightSide('layersBlock')" class="hide">
-              Layers
-            </li>
-            <li onclick="alterRightSide('referrerBlock')">Referrers</li>
-            <li
-              onclick="alterRightSide('blobBlock')"
-              id="blobSidebarItem"
-              class="hide"
-            >
               Contents
             </li>
-            <!-- <li onclick="alterRightSide('othersBlock')">Others</li> -->
+            <li id="referrerSidebarItem" onclick="alterRightSide('referrerBlock')">Referrers</li>
           </ul>
         </div>
         <div class="rightContent">
@@ -69,13 +58,8 @@
             <div class="skeletonLoader"></div>
             <div class="skeletonLoader"></div>
           </div>
-          <div id="manifestBlock" class="contentBlock active">
-            Nothing to show
-          </div>
-          <div id="layersBlock" class="contentBlock">Nothing to show</div>
-          <div id="referrerBlock" class="contentBlock">Nothing to show</div>
-          <div id="blobBlock" class="contentBlock">Nothing to show</div>
-          <!-- <div id="othersBlock" class="contentBlock">Nothing to show</div> -->
+          <div id="manifestBlock" class="contentBlock active"></div>
+          <div id="referrerBlock" class="contentBlock"></div>
         </div>
       </div>
     </div>
