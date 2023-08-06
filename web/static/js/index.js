@@ -74,7 +74,7 @@ function handlePastedString(event, id) {
   event.preventDefault(); // Prevent the default paste behavior
 }
 
-// registry list dropdown javascript
+// list dropdown javascript
 const regList = [
   {
     name: "docker.io",
@@ -127,12 +127,14 @@ function showRegList() {
 }
 // ends
 
-// tag list javascript
+// list javascript
 const tagListDropdown = document.querySelector(
   ".artifactInputForm .tagListDropdown"
 );
+const repoDropdown = document.querySelector(".artifactInputForm .repoDropdown");
 
 let tagList = [];
+let repoList = [];
 let isRepoRegChanged = false;
 
 function fetchTagList() {
@@ -187,6 +189,59 @@ function updateTagList() {
     );
 }
 
+function fetchRepoList() {
+  if (reg.value !== "mcr.microsoft.com") return;
+  return new Promise((resolve, reject) => {
+    repoDropdown.innerHTML =
+      '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
+    const URL = `/api/repos?registry=${reg.value}`;
+    fetch(URL)
+      .then((res) => res.json())
+      .then((data) => {
+        repoList = data;
+        updateRepoList();
+        resolve();
+      })
+      .catch((err) => {
+        repoDropdown.innerHTML = `
+          <div class="error">
+            <img src="./static/images/crossIcon.svg"/>
+            <div>Failed to fetch repositories</div>
+          </div>
+        `;
+        reject(err);
+      });
+  });
+}
+
+function updateRepoList() {
+  if (reg.value !== "mcr.microsoft.com") return;
+  const filterList = repoList.filter((item) => item.includes(repo.value || ""));
+  if (!filterList.length) {
+    repoDropdown.innerHTML = `
+    <div class="info">
+      <img src="./static/images/infoIcon.svg"/>
+      <div>No match found</div>
+    </div>
+    `;
+    return;
+  }
+  let html = "";
+  filterList.map((item) => (html += `<p class="repoListItem">${item}</p>`));
+
+  repoDropdown.innerHTML = html;
+  document
+    .querySelectorAll(".artifactInputForm .repoDropdown p")
+    ?.forEach((repoElement) =>
+      repoElement.addEventListener("click", () => {
+        repo.value = repoElement.innerHTML;
+        repoDropdown.classList.remove("show");
+        repoDropdown.classList.add("hide");
+        updateRepoList();
+      })
+    );
+}
+
 function listTags() {
   if (!repo.value || !reg.value) return;
   tagListDropdown.classList.remove("hide");
@@ -195,6 +250,17 @@ function listTags() {
     fetchTagList();
   } else {
     updateTagList();
+  }
+}
+
+function listRepos() {
+  if (!reg.value || reg.value !== "mcr.microsoft.com") return;
+  repoDropdown.classList.remove("hide");
+  repoDropdown.classList.add("show");
+  if (!repoList.length) {
+    fetchRepoList();
+  } else {
+    updateRepoList();
   }
 }
 
@@ -333,19 +399,40 @@ function downloadManifest() {
   dwnBtn.textContent = "DOWNLOAD";
 }
 
+function redirectByDigest(URL) {
+  window.open(URL, "_blank");
+}
+
 function addHyperlinks() {
   const jsonContent = document.getElementById("manifestJson");
   const textNodes = jsonContent.childNodes;
 
-  const regex = /"sha256:[a-f0-9]{64}"/g;
-  const htmlContent = manifestJson.innerHTML;
+  const regex = /"sha256:([a-f0-9]{64})"/g;
+  const htmlContent = jsonContent.innerHTML;
 
   const updatedHtmlContent = htmlContent.replace(regex, (match) => {
-    const sha256Value = match.slice(1, -1);
-    return `<span id="jsonDigest">${match}</span>`;
+    const mediaTypeSpan = getFollowingMediaType(textNodes, match);
+    const mediaType = mediaTypeSpan
+      ? mediaTypeSpan.textContent.trim().replace(/"/g, "")
+      : "";
+    const redirectURL = `/redirect?mediatype=${encodeURIComponent(
+      mediaType
+    )}&image=${reg.value}/${repo.value}@${match.replace(/"/g, "")}`;
+    return `<span id="jsonDigest" onclick="redirectByDigest('${redirectURL}')">${match}</span>`;
   });
-  manifestJson.innerHTML = updatedHtmlContent;
-  return;
+  jsonContent.innerHTML = updatedHtmlContent;
+}
+
+function getFollowingMediaType(nodes, textToFind) {
+  let shouldFindMediaType = false;
+  for (let i = 0; i < nodes.length; i++) {
+    if (nodes[i].textContent === textToFind) {
+      shouldFindMediaType = true;
+    } else if (shouldFindMediaType && nodes[i].className === "json-string") {
+      return nodes[i];
+    }
+  }
+  return null;
 }
 
 function blockTemplate(table, json, views) {
@@ -383,33 +470,44 @@ function blockTemplate(table, json, views) {
 
 function generateTable(tableData) {
   let records = "";
-  if (!Array.isArray(tableData)) {
-    tableData = [tableData];
-  }
-  tableData.forEach((item, ind) => {
+  const data = Array.isArray(tableData.data)
+    ? tableData.data
+    : [tableData.data];
+
+  data.forEach((item) => {
     records += `
       <tr>
-        <td colspan="4">${item.mediaType}</td>
+        <td colspan="4" id="mediaType">${item.mediaType}</td>
         <td>${item.size}</td>
-        <td colspan="2" id="digest">
-        <div id="digest"> ${item.digest} </div>
-        <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${item.digest}">
+        <td colspan="3" id="digest">
+          <div id="digest">
+            <a href="${tableData.isBlob ? "/blob?layer=" : "/artifact?image="}${
+      reg.value
+    }/${repo.value}@${item.digest}" target="_blank">
+              ${item.digest}
+            </a>
+          </div>
+          <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${
+            item.digest
+          }">
         </td>
       </tr>`;
   });
+
   const table = `
     <div id="table">
-      <table class="ui fixed single line celled table">
+      <table class="ui fixed unstackable single line celled table">
         <thead>
           <tr>
             <th scope="col" colspan="4">Mediatype</th>
             <th scope="col">Size</th>
-            <th scope="col" colspan="2">Digest</th>
+            <th scope="col" colspan="3">Digest</th>
           </tr>
         </thead>
         ${records}
       </table>
     </div>`;
+
   return table;
 }
 
@@ -474,13 +572,12 @@ class RightSideBlock {
           </pre>
         </div>
       `;
-      // addHyperlinks();
 
       const sections = [
-        { title: "Manifests", data: ar.Manifests },
-        { title: "Layers", data: ar.Layers },
-        { title: "Configs", data: ar.Configs },
-        { title: "Subject", data: ar.Subject },
+        { title: "Manifests", data: ar.Manifests, isBlob: false },
+        { title: "Layers", data: ar.Layers, isBlob: true },
+        { title: "Configs", data: ar.Configs, isBlob: true },
+        { title: "Subject", data: ar.Subject, isBlob: false },
       ];
 
       let tableView = sections
@@ -488,7 +585,7 @@ class RightSideBlock {
         .map(
           (section) => `
               <h1>${section.title}</h1>
-              ${generateTable(section.data)}
+              ${generateTable(section)}
           `
         )
         .join("");
@@ -509,6 +606,8 @@ class RightSideBlock {
           item.classList.add("active");
         });
       });
+
+      addHyperlinks();
 
       rsb.isManifestPrepared = true;
     } catch (err) {
@@ -685,6 +784,11 @@ document.addEventListener("click", (event) => {
     reg.contains(event.target) ||
     event.target.classList.contains("regListItem");
 
+  const isOutsideRepoList =
+    repoDropdown.contains(event.target) ||
+    repo.contains(event.target) ||
+    event.target.classList.contains("repoListItem");
+
   if (!isOutsideRegList) {
     regDropdown.classList.remove("show");
     regDropdown.classList.add("hide");
@@ -692,6 +796,10 @@ document.addEventListener("click", (event) => {
   if (!isOutsideTagList) {
     tagListDropdown.classList.remove("show");
     tagListDropdown.classList.add("hide");
+  }
+  if (!isOutsideRepoList) {
+    repoDropdown.classList.remove("show");
+    repoDropdown.classList.add("hide");
   }
 });
 

@@ -120,11 +120,10 @@
 
           loader.classList.add("hide");
           document.querySelector(".content").classList.remove("hide");
-          console.log(data);
           if (
-            (Array.isArray(data.Data) && !data.length) ||
-            !Object.keys(data.Data).length ||
-            data.ContentLength > 120000
+            data.ContentLength > 120000 ||
+            (Array.isArray(data.Data) && !data.Data.length) ||
+            !Object.keys(data.Data).length
           ) {
             blobContent.innerHTML = `
             <div class="error">

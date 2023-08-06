@@ -20,8 +20,11 @@
         class="form-control"
         id="floatingInput"
         placeholder="repository"
+        oninput="updateRepoList()"
+        onfocus="listRepos()"
       />
       <label for="floatingInput">Repository</label>
+      <div class="repoDropdown hide"></div>
     </div>
   </div>
   <div class="form-floating mb-3" id="digestortag">

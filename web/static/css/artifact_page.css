@@ -42,7 +42,8 @@
   width: 100%;
 }
 .tagListDropdown,
-.registryDropdown {
+.registryDropdown,
+.repoDropdown {
   position: absolute;
   top: 70px;
   border-radius: 10px;
@@ -56,22 +57,28 @@
 .registryDropdown {
   height: fit-content;
 }
-.tagListDropdown {
+.tagListDropdown,
+.repoDropdown {
   height: 165px;
 }
-.tagListDropdown .items {
+.tagListDropdown .items,
+.repoDropdown .items {
   cursor: pointer;
   padding: 8px 15px;
 }
-.tagListDropdown p {
+.tagListDropdown p,
+.repoDropdown p {
   padding: 5px 15px;
   cursor: pointer;
 }
-.tagListDropdown p:hover {
+.tagListDropdown p:hover,
+.repoDropdown p:hover {
   background-color: var(--text-light);
 }
 .tagListDropdown .error,
-.tagListDropdown .info {
+.tagListDropdown .info,
+.repoDropdown .error,
+.repoDropdown .info {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -81,7 +88,9 @@
   flex-direction: column;
 }
 .tagListDropdown .error img,
-.tagListDropdown .info img {
+.tagListDropdown .info img,
+.repoDropdown .error img,
+.repoDropdown .info img {
   width: 32px;
 }
 .registryDropdown .items {
@@ -253,27 +262,19 @@
   padding: 10px 20px;
   border-radius: 5px;
 }
-#manifestBlock table tr #digest,
-#blobBlock table tr #digest,
-#layersBlock table tr #digest {
+#manifestBlock table tr #digest {
   color: var(--text-link);
   cursor: pointer;
   position: relative;
 }
-#manifestBlock table tr #digest div,
-#blobBlock table tr #digest div,
-#layersBlock table tr #digest div {
+#manifestBlock table tr #digest div {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-#manifestBlock table tr #digest:hover div,
-#blobBlock table tr #digest:hover div,
-#layersBlock table tr #digest:hover div {
+#manifestBlock table tr #digest:hover div {
   width: 92%;
 }
-#manifestBlock table tr td #copyIcon,
-#blobBlock table tr td #copyIcon,
-#layersBlock table tr td #copyIcon {
+#manifestBlock table tr td #copyIcon {
   width: 13px;
   position: absolute;
   top: 18px;
@@ -282,17 +283,12 @@
   background: white;
   visibility: hidden;
 }
-#manifestBlock table tr #digest:hover #copyIcon,
-#blobBlock table tr #digest:hover #copyIcon,
-#layersBlock table tr #digest:hover #copyIcon {
+#manifestBlock table tr #digest:hover #copyIcon {
   visibility: visible;
 }
 #referrerBlock .info,
 #referrerBlock .error,
 #manifestBlock .error,
-#blobBlock .info,
-#blobBlock .info,
-#layersBlock .error,
 #content_area .error {
   display: flex;
   flex-direction: column;
@@ -304,24 +300,15 @@
 }
 #referrerBlock .info img,
 #referrerBlock .error img,
-#manifestBlock .error img,
-#blobBlock .error img,
-#blobBlock .info img,
-#layersBlock .info img {
+#manifestBlock .error img {
   width: 40px;
 }
 #manifestTable,
-#layersTable,
-#configsTable,
-#referrers,
-#blobTable {
+#referrers {
   overflow: hidden;
 }
 #manifestTable .view-item,
-#layersTable .view-item,
-#configsTable .view-item,
-#referrers .view-item,
-#blobTable .view-item {
+#referrers .view-item {
   display: none;
   margin-top: 1rem;
   opacity: 0;
@@ -330,24 +317,25 @@
   overflow: auto;
 }
 #manifestTable #jsonV,
-#layersTable #jsonV,
-#configsTable #jsonV,
-#referrers #jsonV,
-#blobTable #jsonV {
+#referrers #jsonV {
   max-height: 70vh;
   overflow: auto;
   width: 100%;
 }
+
+#table #mediaType:hover {
+  cursor: default;
+  overflow: auto;
+  text-overflow: inherit;
+}
+
 #jsonV > pre > span:nth-child(1) {
   display: inline-block;
   margin-left: -107px;
 }
 
 #manifestTable .view-item.active,
-#layersTable .view-item.active,
-#configsTable .view-item.active,
-#referrers .view-item.active,
-#blobTable .view-item.active {
+#referrers .view-item.active {
   display: block;
   opacity: 1;
 }
