@@ -31,6 +31,7 @@
 }
 .form {
   width: 60vw;
+  max-width: 1400px;
   transform: translateY(-40%);
   background-color: #fff;
   margin: auto;
@@ -165,6 +166,10 @@
   padding-bottom: 0.625rem;
 }
 /* main body */
+.main {
+  max-width: 1500px;
+  margin: auto;
+}
 .main .rgs {
   display: flex;
   justify-content: center;

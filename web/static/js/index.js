@@ -377,15 +377,7 @@ function downloadManifest() {
   const dwnBtn = document.querySelector("#manifestDownload");
 
   dwnBtn.textContent = "loading...";
-  const jsonString = JSON.stringify(
-    {
-      artifact: ar.Artifact,
-      digest: ar.Digest,
-      manifest: [...ar.Manifests],
-    },
-    null,
-    2
-  );
+  const jsonString = JSON.stringify(ar.Manifest, null, 2);
 
   const blob = new Blob([jsonString], { type: "application/json" });
   const downloadLink = document.createElement("a");

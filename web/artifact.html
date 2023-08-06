@@ -2,64 +2,71 @@
 <html lang="en">
   {{ template "artifactHeader" }}
   <body>
-    {{ template "navbar" }}
+    <div>
+      {{ template "navbar" }}
 
-    <!-- hero form -->
-    <div class="hero">
-      <div class="form">
-        {{ template "form" }}
-        <button onclick='onSubmit("artifact")'>
-          <div class="icon">
-            <img src="./static/images/downArrow.svg" alt="" />
-          </div>
-          Explore contents
-        </button>
-      </div>
-    </div>
-
-    <!-- artifact content section -->
-    <div id="content_area" class="hide">
-      <h1>Artifact</h1>
-      <div class="metaData">
-        <div class="ui labeled input">
-          <div class="ui label">Artifact Name:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-        </div>
-        <div class="ui labeled input">
-          <div class="ui label">Content-Digest:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-        </div>
-        <div class="ui labeled input">
-          <div class="ui label">MediaType:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+      <!-- hero form -->
+      <div class="hero">
+        <div class="form">
+          {{ template "form" }}
+          <button onclick='onSubmit("artifact")'>
+            <div class="icon">
+              <img src="./static/images/downArrow.svg" alt="" />
+            </div>
+            Explore contents
+          </button>
         </div>
       </div>
 
-      <div class="main">
-        <div class="leftSideBar">
-          <ul>
-            <li
-              class="active show"
-              onclick="alterRightSide('manifestBlock')"
-              id="manifestSidebarItem"
-            >
-              Contents
-            </li>
-            <li id="referrerSidebarItem" onclick="alterRightSide('referrerBlock')">Referrers</li>
-          </ul>
-        </div>
-        <div class="rightContent">
-          <div class="spinner loadingBlock">
-            <div class="skeletonLoader"></div>
-            <div class="skeletonLoader"></div>
-            <div class="skeletonLoader"></div>
-            <div class="skeletonLoader"></div>
+      <!-- artifact content section -->
+      <div id="content_area" class="hide">
+        <h1>Artifact</h1>
+        <div class="metaData">
+          <div class="ui labeled input">
+            <div class="ui label">Artifact Name:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
           </div>
-          <div id="manifestBlock" class="contentBlock active"></div>
-          <div id="referrerBlock" class="contentBlock"></div>
+          <div class="ui labeled input">
+            <div class="ui label">Content-Digest:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          </div>
+          <div class="ui labeled input">
+            <div class="ui label">MediaType:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          </div>
+        </div>
+
+        <div class="main">
+          <div class="leftSideBar">
+            <ul>
+              <li
+                class="active show"
+                onclick="alterRightSide('manifestBlock')"
+                id="manifestSidebarItem"
+              >
+                Contents
+              </li>
+              <li
+                id="referrerSidebarItem"
+                onclick="alterRightSide('referrerBlock')"
+              >
+                Referrers
+              </li>
+            </ul>
+          </div>
+          <div class="rightContent">
+            <div class="spinner loadingBlock">
+              <div class="skeletonLoader"></div>
+              <div class="skeletonLoader"></div>
+              <div class="skeletonLoader"></div>
+              <div class="skeletonLoader"></div>
+            </div>
+            <div id="manifestBlock" class="contentBlock active"></div>
+            <div id="referrerBlock" class="contentBlock"></div>
+          </div>
         </div>
       </div>
     </div>

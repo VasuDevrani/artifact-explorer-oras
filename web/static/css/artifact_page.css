@@ -11,6 +11,7 @@
 }
 .form {
   width: 60vw;
+  max-width: 1400px;
   background-color: #fff;
   margin: auto;
   padding: 20px;

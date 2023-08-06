@@ -2,72 +2,75 @@
 <html lang="en">
   {{ template "homeHeader" }}
   <body>
-    {{ template "navbar" }}
-    <!-- hero section -->
-    <div class="hero">
-      <div class="heroHead">
-        <h1>ORAS Artifact Explorer</h1>
-        <p>
-          Explore the content of OCI artifacts from any public repository at
-          <br />
-          ease with ORAS under the hood
-        </p>
+    <div>
+      {{ template "navbar" }}
+      <!-- hero section -->
+      <div class="hero">
+        <div class="heroHead">
+          <h1>ORAS Artifact Explorer</h1>
+          <p>
+            Explore the content of OCI artifacts from any public repository at
+            <br />
+            ease with ORAS under the hood
+          </p>
+        </div>
       </div>
-    </div>
-    <div class="form">
-      {{ template "form" }}
-      <button onclick='onSubmit("home")'>
-        Explore now <img src="./static/images/rightArrow.svg" alt="" />
-      </button>
-    </div>
-    <!-- main body -->
-    <div class="main">
-      <div class="rgs">
-        <img src="./static/images/registryImages/image1.svg" alt="" />
-        <img src="./static/images/registryImages/image2.svg" alt="" />
-        <img src="./static/images/registryImages/image3.svg" alt="" />
-        <img src="./static/images/registryImages/image4.svg" alt="" />
-        <img src="./static/images/registryImages/image5.svg" alt="" />
+      <div class="form">
+        {{ template "form" }}
+        <button onclick='onSubmit("home")'>
+          Explore now <img src="./static/images/rightArrow.svg" alt="" />
+        </button>
       </div>
-      <div class="about">
-        <h1>What is ORAS Artifact Explorer?</h1>
-        <p>
-          ORAS is the de facto tool for working with OCI Artifacts. It treats
-          media types as a critical piece of the puzzle. Container images are
-          never assumed to be the artifact in question. ORAS provides CLI and
-          client libraries to distribute artifacts across OCI-compliant
-          registries. ORAS is the de facto tool for working with OCI Artifacts.
-        </p>
-      </div>
-      <div class="features">{{template "features"}}</div>
-      <!-- communitySupport -->
-      <div class="community">
-        <h1>Join the Community</h1>
-        <p>
-          Join the ever-growing ORAS community for updates, support, and
-          collaboration.
-        </p>
-        <div class="connectOptions">
-          <div class="urls">
-            <div class="urlItems">
-              <img src="./static/images/slackColor.svg" alt="" />
-              <p>Slack</p>
+      <!-- main body -->
+      <div class="main">
+        <div class="rgs">
+          <img src="./static/images/registryImages/image1.svg" alt="" />
+          <img src="./static/images/registryImages/image2.svg" alt="" />
+          <img src="./static/images/registryImages/image3.svg" alt="" />
+          <img src="./static/images/registryImages/image4.svg" alt="" />
+          <img src="./static/images/registryImages/image5.svg" alt="" />
+        </div>
+        <div class="about">
+          <h1>What is ORAS Artifact Explorer?</h1>
+          <p>
+            ORAS is the de facto tool for working with OCI Artifacts. It treats
+            media types as a critical piece of the puzzle. Container images are
+            never assumed to be the artifact in question. ORAS provides CLI and
+            client libraries to distribute artifacts across OCI-compliant
+            registries. ORAS is the de facto tool for working with OCI
+            Artifacts.
+          </p>
+        </div>
+        <div class="features">{{template "features"}}</div>
+        <!-- communitySupport -->
+        <div class="community">
+          <h1>Join the Community</h1>
+          <p>
+            Join the ever-growing ORAS community for updates, support, and
+            collaboration.
+          </p>
+          <div class="connectOptions">
+            <div class="urls">
+              <div class="urlItems">
+                <img src="./static/images/slackColor.svg" alt="" />
+                <p>Slack</p>
+              </div>
+              <div class="urlItems">
+                <img src="./static/images/githubColor.svg" alt="" />
+                <p>Github</p>
+              </div>
+              <div class="urlItems">
+                <img src="./static/images/twitterColor.svg" alt="" />
+                <p>Twitter</p>
+              </div>
             </div>
-            <div class="urlItems">
-              <img src="./static/images/githubColor.svg" alt="" />
-              <p>Github</p>
+            <div class="calendarBlock">
+              <div class="text">
+                <h2>ORAS Community Call</h2>
+                <p>Biweekly Tuesday of every month | 5:00 PM PDT</p>
+              </div>
+              <button>Add to Calendar</button>
             </div>
-            <div class="urlItems">
-              <img src="./static/images/twitterColor.svg" alt="" />
-              <p>Twitter</p>
-            </div>
-          </div>
-          <div class="calendarBlock">
-            <div class="text">
-              <h2>ORAS Community Call</h2>
-              <p>Biweekly Tuesday of every month | 5:00 PM PDT</p>
-            </div>
-            <button>Add to Calendar</button>
           </div>
         </div>
       </div>
