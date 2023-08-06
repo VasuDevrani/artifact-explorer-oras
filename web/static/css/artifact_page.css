@@ -253,27 +253,19 @@
   padding: 10px 20px;
   border-radius: 5px;
 }
-#manifestBlock table tr #digest,
-#blobBlock table tr #digest,
-#layersBlock table tr #digest {
+#manifestBlock table tr #digest {
   color: var(--text-link);
   cursor: pointer;
   position: relative;
 }
-#manifestBlock table tr #digest div,
-#blobBlock table tr #digest div,
-#layersBlock table tr #digest div {
+#manifestBlock table tr #digest div{
   overflow: hidden;
   text-overflow: ellipsis;
 }
-#manifestBlock table tr #digest:hover div,
-#blobBlock table tr #digest:hover div,
-#layersBlock table tr #digest:hover div {
+#manifestBlock table tr #digest:hover div {
   width: 92%;
 }
-#manifestBlock table tr td #copyIcon,
-#blobBlock table tr td #copyIcon,
-#layersBlock table tr td #copyIcon {
+#manifestBlock table tr td #copyIcon {
   width: 13px;
   position: absolute;
   top: 18px;
@@ -282,17 +274,12 @@
   background: white;
   visibility: hidden;
 }
-#manifestBlock table tr #digest:hover #copyIcon,
-#blobBlock table tr #digest:hover #copyIcon,
-#layersBlock table tr #digest:hover #copyIcon {
+#manifestBlock table tr #digest:hover #copyIcon {
   visibility: visible;
 }
 #referrerBlock .info,
 #referrerBlock .error,
 #manifestBlock .error,
-#blobBlock .info,
-#blobBlock .info,
-#layersBlock .error,
 #content_area .error {
   display: flex;
   flex-direction: column;
@@ -304,24 +291,15 @@
 }
 #referrerBlock .info img,
 #referrerBlock .error img,
-#manifestBlock .error img,
-#blobBlock .error img,
-#blobBlock .info img,
-#layersBlock .info img {
+#manifestBlock .error img {
   width: 40px;
 }
 #manifestTable,
-#layersTable,
-#configsTable,
-#referrers,
-#blobTable {
+#referrers{
   overflow: hidden;
 }
 #manifestTable .view-item,
-#layersTable .view-item,
-#configsTable .view-item,
-#referrers .view-item,
-#blobTable .view-item {
+#referrers .view-item {
   display: none;
   margin-top: 1rem;
   opacity: 0;
@@ -330,24 +308,25 @@
   overflow: auto;
 }
 #manifestTable #jsonV,
-#layersTable #jsonV,
-#configsTable #jsonV,
-#referrers #jsonV,
-#blobTable #jsonV {
+#referrers #jsonV {
   max-height: 70vh;
   overflow: auto;
   width: 100%;
 }
+
+#table #mediaType:hover {
+  cursor: default;
+  overflow: auto;
+  text-overflow: inherit;
+}
+
 #jsonV > pre > span:nth-child(1) {
   display: inline-block;
   margin-left: -107px;
 }
 
 #manifestTable .view-item.active,
-#layersTable .view-item.active,
-#configsTable .view-item.active,
-#referrers .view-item.active,
-#blobTable .view-item.active {
+#referrers .view-item.active{
   display: block;
   opacity: 1;
 }

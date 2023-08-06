@@ -10,10 +10,10 @@ import (
 )
 
 const (
-	DOWNLOAD = "download"
+	DOWNLOAD    = "download"
 	ATSYMBOL    = "@"
 	COLONSYMBOL = ":"
-) 
+)
 
 type Query map[string]string
 
@@ -48,6 +48,12 @@ type Blob struct {
 	Digest        string
 	Data          interface{}
 }
+
+const (
+	MediaTypeArtifactManifest = "application/vnd.oci.artifact.manifest.v1+json"
+	MediaTypeManifestList     = "application/vnd.docker.distribution.manifest.list.v2+json"
+	MediaTypeManifest         = "application/vnd.docker.distribution.manifest.v2+json"
+)
 
 type ErrorResponse struct {
 	StatusCode int    `json:"status"`
@@ -112,4 +118,18 @@ func Err(errorMessage string, statusCode int) ErrorResponse {
 func isJSON(data []byte) bool {
 	var js map[string]interface{}
 	return json.Unmarshal(data, &js) == nil
+}
+
+func isManifest(mediaType string, image string) bool {
+	switch mediaType {
+	case MediaTypeArtifactManifest,
+		MediaTypeManifestList,
+		MediaTypeManifest,
+		v1.MediaTypeImageManifest,
+		v1.MediaTypeImageIndex:
+
+		return true
+	default:
+		return false
+	}
 }
