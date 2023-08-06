@@ -42,7 +42,8 @@
   width: 100%;
 }
 .tagListDropdown,
-.registryDropdown {
+.registryDropdown,
+.repoDropdown {
   position: absolute;
   top: 70px;
   border-radius: 10px;
@@ -56,22 +57,28 @@
 .registryDropdown {
   height: fit-content;
 }
-.tagListDropdown {
+.tagListDropdown,
+.repoDropdown {
   height: 165px;
 }
-.tagListDropdown .items {
+.tagListDropdown .items,
+.repoDropdown .items {
   cursor: pointer;
   padding: 8px 15px;
 }
-.tagListDropdown p {
+.tagListDropdown p,
+.repoDropdown p {
   padding: 5px 15px;
   cursor: pointer;
 }
-.tagListDropdown p:hover {
+.tagListDropdown p:hover,
+.repoDropdown p:hover {
   background-color: var(--text-light);
 }
 .tagListDropdown .error,
-.tagListDropdown .info {
+.tagListDropdown .info,
+.repoDropdown .error,
+.repoDropdown .info {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -81,7 +88,9 @@
   flex-direction: column;
 }
 .tagListDropdown .error img,
-.tagListDropdown .info img {
+.tagListDropdown .info img,
+.repoDropdown .error img,
+.repoDropdown .info img {
   width: 32px;
 }
 .registryDropdown .items {
@@ -258,7 +267,7 @@
   cursor: pointer;
   position: relative;
 }
-#manifestBlock table tr #digest div{
+#manifestBlock table tr #digest div {
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -295,7 +304,7 @@
   width: 40px;
 }
 #manifestTable,
-#referrers{
+#referrers {
   overflow: hidden;
 }
 #manifestTable .view-item,
@@ -326,7 +335,7 @@
 }
 
 #manifestTable .view-item.active,
-#referrers .view-item.active{
+#referrers .view-item.active {
   display: block;
   opacity: 1;
 }

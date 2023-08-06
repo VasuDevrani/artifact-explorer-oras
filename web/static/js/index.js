@@ -74,7 +74,7 @@ function handlePastedString(event, id) {
   event.preventDefault(); // Prevent the default paste behavior
 }
 
-// registry list dropdown javascript
+// list dropdown javascript
 const regList = [
   {
     name: "docker.io",
@@ -127,12 +127,14 @@ function showRegList() {
 }
 // ends
 
-// tag list javascript
+// list javascript
 const tagListDropdown = document.querySelector(
   ".artifactInputForm .tagListDropdown"
 );
+const repoDropdown = document.querySelector(".artifactInputForm .repoDropdown");
 
 let tagList = [];
+let repoList = [];
 let isRepoRegChanged = false;
 
 function fetchTagList() {
@@ -187,6 +189,59 @@ function updateTagList() {
     );
 }
 
+function fetchRepoList() {
+  if (reg.value !== "mcr.microsoft.com") return;
+  return new Promise((resolve, reject) => {
+    repoDropdown.innerHTML =
+      '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
+    const URL = `/api/repos?registry=${reg.value}`;
+    fetch(URL)
+      .then((res) => res.json())
+      .then((data) => {
+        repoList = data;
+        updateRepoList();
+        resolve();
+      })
+      .catch((err) => {
+        repoDropdown.innerHTML = `
+          <div class="error">
+            <img src="./static/images/crossIcon.svg"/>
+            <div>Failed to fetch repositories</div>
+          </div>
+        `;
+        reject(err);
+      });
+  });
+}
+
+function updateRepoList() {
+  if (reg.value !== "mcr.microsoft.com") return;
+  const filterList = repoList.filter((item) => item.includes(repo.value || ""));
+  if (!filterList.length) {
+    repoDropdown.innerHTML = `
+    <div class="info">
+      <img src="./static/images/infoIcon.svg"/>
+      <div>No match found</div>
+    </div>
+    `;
+    return;
+  }
+  let html = "";
+  filterList.map((item) => (html += `<p class="repoListItem">${item}</p>`));
+
+  repoDropdown.innerHTML = html;
+  document
+    .querySelectorAll(".artifactInputForm .repoDropdown p")
+    ?.forEach((repoElement) =>
+      repoElement.addEventListener("click", () => {
+        repo.value = repoElement.innerHTML;
+        repoDropdown.classList.remove("show");
+        repoDropdown.classList.add("hide");
+        updateRepoList();
+      })
+    );
+}
+
 function listTags() {
   if (!repo.value || !reg.value) return;
   tagListDropdown.classList.remove("hide");
@@ -195,6 +250,17 @@ function listTags() {
     fetchTagList();
   } else {
     updateTagList();
+  }
+}
+
+function listRepos() {
+  if (!reg.value || reg.value !== "mcr.microsoft.com") return;
+  repoDropdown.classList.remove("hide");
+  repoDropdown.classList.add("show");
+  if (!repoList.length) {
+    fetchRepoList();
+  } else {
+    updateRepoList();
   }
 }
 
@@ -349,9 +415,9 @@ function addHyperlinks() {
     const mediaType = mediaTypeSpan
       ? mediaTypeSpan.textContent.trim().replace(/"/g, "")
       : "";
-    const redirectURL = `/redirect?mediatype=${encodeURIComponent(mediaType)}&image=${reg.value}/${
-      repo.value
-    }@${match.replace(/"/g, "")}`;
+    const redirectURL = `/redirect?mediatype=${encodeURIComponent(
+      mediaType
+    )}&image=${reg.value}/${repo.value}@${match.replace(/"/g, "")}`;
     return `<span id="jsonDigest" onclick="redirectByDigest('${redirectURL}')">${match}</span>`;
   });
   jsonContent.innerHTML = updatedHtmlContent;
@@ -718,6 +784,11 @@ document.addEventListener("click", (event) => {
     reg.contains(event.target) ||
     event.target.classList.contains("regListItem");
 
+  const isOutsideRepoList =
+    repoDropdown.contains(event.target) ||
+    repo.contains(event.target) ||
+    event.target.classList.contains("repoListItem");
+
   if (!isOutsideRegList) {
     regDropdown.classList.remove("show");
     regDropdown.classList.add("hide");
@@ -725,6 +796,10 @@ document.addEventListener("click", (event) => {
   if (!isOutsideTagList) {
     tagListDropdown.classList.remove("show");
     tagListDropdown.classList.add("hide");
+  }
+  if (!isOutsideRepoList) {
+    repoDropdown.classList.remove("show");
+    repoDropdown.classList.add("hide");
   }
 });
 
