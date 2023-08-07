@@ -4,8 +4,11 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/opencontainers/go-digest"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
 	oras "oras.land/oras-go/v2"
+	"oras.land/oras-go/v2/content"
 	"oras.land/oras-go/v2/registry/remote"
 )
 
@@ -18,14 +21,16 @@ const (
 type Query map[string]string
 
 type ArtifactContent struct {
-	Artifact  string
-	MediaType string
-	Digest    string
-	Manifest  interface{}
-	Manifests interface{}
-	Configs   interface{}
-	Layers    interface{}
-	Subjects  interface{}
+	Artifact     string
+	MediaType    string
+	Digest       string
+	ArtifactType string
+	Size         int64
+	Subject      v1.Descriptor
+	Manifest     interface{}
+	Manifests    interface{}
+	Configs      interface{}
+	Layers       interface{}
 }
 
 type Artifact struct {
@@ -132,4 +137,62 @@ func isManifest(mediaType string, image string) bool {
 	default:
 		return false
 	}
+}
+
+func PullManifest(a Artifact) (ArtifactContent, ErrorResponse) {
+	artifact := a.Registry + a.Repository
+	repo, err := remote.NewRepository(artifact)
+	if err != nil {
+		return ArtifactContent{}, Err("Repository does not exist", fiber.StatusNotFound)
+	}
+	ctx := context.Background()
+	var descriptor v1.Descriptor
+	descriptor, err = oras.Resolve(ctx, repo, a.Name, oras.DefaultResolveOptions)
+	if err != nil {
+		return ArtifactContent{}, Err("Cannot resolve descriptor with provided reference from the target", fiber.StatusNotFound)
+	}
+	rc, err := repo.Fetch(ctx, descriptor)
+	if err != nil {
+		return ArtifactContent{}, Err("Failed to fetch content manifest", fiber.StatusNotFound)
+	}
+	defer rc.Close()
+	pulledBlob, err := content.ReadAll(rc, descriptor)
+	if err != nil {
+		return ArtifactContent{}, Err("Failed to fetch content manifest", fiber.StatusNotFound)
+	}
+
+	jsonData := string(pulledBlob)
+
+	var data map[string]interface{}
+	err = json.Unmarshal([]byte(jsonData), &data)
+	if err != nil {
+		return ArtifactContent{}, Err(err.Error(), fiber.StatusInternalServerError)
+	}
+
+	result := ArtifactContent{
+		Artifact:     a.Name,
+		Manifest:     data,
+		Manifests:    data["manifests"],
+		Configs:      data["config"],
+		Layers:       data["layers"],
+		Digest:       string(descriptor.Digest),
+		MediaType:    string(descriptor.MediaType),
+		Size:         int64(descriptor.Size),
+		ArtifactType: descriptor.ArtifactType,
+	}
+
+	if subjectData, ok := data["subject"].(map[string]interface{}); ok {
+		var subject v1.Descriptor
+
+		subject.MediaType, _ = subjectData["mediaType"].(string)
+		if digestStr, ok := subjectData["digest"].(string); ok {
+			subject.Digest = digest.Digest(digestStr)
+		}
+		if sizeFloat, ok := subjectData["size"].(float64); ok {
+			subject.Size = int64(sizeFloat)
+		}
+		result.Subject = subject
+	}
+
+	return result, ErrorResponse{}
 }
