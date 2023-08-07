@@ -83,6 +83,16 @@
 .repoDropdown {
   height: 165px;
 }
+.repoDropdown .repoListItem.active, .tagListDropdown .tagListItem.active {
+  background-color: var(--text-light);
+}
+.registryDropdown .items.active {
+  background-color: var(--text-light);
+}
+.tagListDropdown .items.active,
+.repoDropdown .items.active {
+  background-color: var(--text-light);
+}
 .tagListDropdown .items,
 .repoDropdown .items {
   cursor: pointer;
