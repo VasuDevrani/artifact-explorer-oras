@@ -127,6 +127,109 @@ function showRegList() {
 }
 // ends
 
+// enable keyboard interaction in dropdown
+let activeRegItemIndex = -1;
+let activeTagItemIndex = -1;
+let activeRepoItemIndex = -1;
+
+function resetItemIndex() {
+  activeRegItemIndex = -1;
+  activeTagItemIndex = -1;
+  activeRepoItemIndex = -1;
+}
+
+function setActiveItem(dropdown, index, selector) {
+  const items = dropdown.querySelectorAll(selector);
+  items.forEach((item, i) => {
+    item.classList.toggle("active", i === index);
+  });
+
+  // Set the value based on the active index
+  const activeItem = dropdown.querySelector(".active");
+  switch (selector) {
+    case ".items":
+      reg.value = activeItem?.textContent?.trim();
+      break;
+    case ".tagListItem":
+      tag.value = activeItem?.textContent?.trim();
+      break;
+    case ".repoListItem":
+      repo.value = activeItem?.textContent?.trim();
+      break;
+    default:
+      break;
+  }
+}
+
+// function to handle the scrolling behavior for a specific dropdown
+function handleDropdownScroll(
+  dropdown,
+  event,
+  itemsSelector,
+  activeIndex,
+  setActiveIndex
+) {
+  if (dropdown.classList.contains("show")) {
+    const items = dropdown.querySelectorAll(itemsSelector);
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      activeIndex = (activeIndex + 1) % items.length;
+      setActiveIndex(activeIndex);
+      scrollToSelectedItem(dropdown, activeIndex, itemsSelector);
+      setActiveItem(dropdown, activeIndex, itemsSelector);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      activeIndex = (activeIndex - 1 + items.length) % items.length;
+      setActiveIndex(activeIndex);
+      scrollToSelectedItem(dropdown, activeIndex, itemsSelector);
+      setActiveItem(dropdown, activeIndex, itemsSelector);
+    } else if (event.key === "Enter") {
+      event.preventDefault();
+      setActiveItem(dropdown, activeIndex, itemsSelector);
+    }
+  }
+}
+
+function scrollToSelectedItem(dropdown, index, selector) {
+  const items = dropdown.querySelectorAll(selector);
+  if (index >= 0 && index < items.length) {
+    items[index].scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
+  }
+}
+
+document.addEventListener("keydown", (event) => {
+  handleDropdownScroll(
+    regDropdown,
+    event,
+    ".items",
+    activeRegItemIndex,
+    (index) => {
+      activeRegItemIndex = index;
+    }
+  );
+  handleDropdownScroll(
+    tagListDropdown,
+    event,
+    ".tagListItem",
+    activeTagItemIndex,
+    (index) => {
+      activeTagItemIndex = index;
+    }
+  );
+  handleDropdownScroll(
+    repoDropdown,
+    event,
+    ".repoListItem",
+    activeRepoItemIndex,
+    (index) => {
+      activeRepoItemIndex = index;
+    }
+  );
+});
+
 // list javascript
 const tagListDropdown = document.querySelector(
   ".artifactInputForm .tagListDropdown"
@@ -187,6 +290,7 @@ function updateTagList() {
         updateTagList();
       })
     );
+  resetItemIndex();
 }
 
 function fetchRepoList() {
@@ -216,6 +320,7 @@ function fetchRepoList() {
 
 function updateRepoList() {
   if (reg.value !== "mcr.microsoft.com") return;
+
   const filterList = repoList.filter((item) => item.includes(repo.value || ""));
   if (!filterList.length) {
     repoDropdown.innerHTML = `
@@ -240,6 +345,7 @@ function updateRepoList() {
         updateRepoList();
       })
     );
+  resetItemIndex();
 }
 
 function listTags() {
@@ -377,15 +483,7 @@ function downloadManifest() {
   const dwnBtn = document.querySelector("#manifestDownload");
 
   dwnBtn.textContent = "loading...";
-  const jsonString = JSON.stringify(
-    {
-      artifact: ar.Artifact,
-      digest: ar.Digest,
-      manifest: [...ar.Manifests],
-    },
-    null,
-    2
-  );
+  const jsonString = JSON.stringify(ar.Manifest, null, 2);
 
   const blob = new Blob([jsonString], { type: "application/json" });
   const downloadLink = document.createElement("a");

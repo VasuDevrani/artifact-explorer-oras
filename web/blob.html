@@ -2,39 +2,41 @@
 <html lang="en">
   {{ template "blobHeader" }}
   <body>
-    {{ template "navbar" }}
-    <div class="spinner">
-      <div class="skeletonLoader"></div>
-      <div class="skeletonLoader"></div>
-    </div>
-    <div class="content hide">
-      <div class="metaData">
-        <div class="ui labeled input">
-          <div class="ui label">Artifact Name:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-        </div>
-        <div class="ui labeled input">
-          <div class="ui label">Content-Digest:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-        </div>
-        <div class="ui labeled input">
-          <div class="ui label">Content-Type:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-        </div>
-        <div class="ui labeled input">
-          <div class="ui label">Content-Length:</div>
-          <input type="text" placeholder="not available" disabled />
-          <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-        </div>
+    <div>
+      {{ template "navbar" }}
+      <div class="spinner">
+        <div class="skeletonLoader"></div>
+        <div class="skeletonLoader"></div>
       </div>
-      <div class="buttonGroup">
-        <button onclick="downloadBlob()">Download</button>
-        <!-- <button>Copy</button> -->
+      <div class="content hide">
+        <div class="metaData">
+          <div class="ui labeled input">
+            <div class="ui label">Artifact Name:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          </div>
+          <div class="ui labeled input">
+            <div class="ui label">Content-Digest:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          </div>
+          <div class="ui labeled input">
+            <div class="ui label">Content-Type:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          </div>
+          <div class="ui labeled input">
+            <div class="ui label">Content-Length:</div>
+            <input type="text" placeholder="not available" disabled />
+            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          </div>
+        </div>
+        <div class="buttonGroup">
+          <button onclick="downloadBlob()">Download</button>
+          <!-- <button>Copy</button> -->
+        </div>
+        <div class="blobContent"></div>
       </div>
-      <div class="blobContent"></div>
     </div>
     {{template "footer"}}
     <script>
@@ -43,7 +45,7 @@
       const ins = document.querySelectorAll(".content .metaData input");
       const loader = document.querySelector(".spinner");
       const downloadBtn = document.querySelector(".buttonGroup > button");
-      const copyIcons = document.querySelectorAll("#copyIcon")
+      const copyIcons = document.querySelectorAll("#copyIcon");
 
       let artifactParams = null;
 

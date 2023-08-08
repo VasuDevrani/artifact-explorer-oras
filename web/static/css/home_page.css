@@ -31,6 +31,7 @@
 }
 .form {
   width: 60vw;
+  max-width: 1400px;
   transform: translateY(-40%);
   background-color: #fff;
   margin: auto;
@@ -81,6 +82,16 @@
 .tagListDropdown,
 .repoDropdown {
   height: 165px;
+}
+.repoDropdown .repoListItem.active, .tagListDropdown .tagListItem.active {
+  background-color: var(--text-light);
+}
+.registryDropdown .items.active {
+  background-color: var(--text-light);
+}
+.tagListDropdown .items.active,
+.repoDropdown .items.active {
+  background-color: var(--text-light);
 }
 .tagListDropdown .items,
 .repoDropdown .items {
@@ -165,6 +176,10 @@
   padding-bottom: 0.625rem;
 }
 /* main body */
+.main {
+  max-width: 1500px;
+  margin: auto;
+}
 .main .rgs {
   display: flex;
   justify-content: center;

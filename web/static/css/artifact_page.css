@@ -11,6 +11,7 @@
 }
 .form {
   width: 60vw;
+  max-width: 1400px;
   background-color: #fff;
   margin: auto;
   padding: 20px;
@@ -66,6 +67,10 @@
   cursor: pointer;
   padding: 8px 15px;
 }
+.tagListDropdown .items.active,
+.repoDropdown .items.active {
+  background-color: var(--text-light);
+}
 .tagListDropdown p,
 .repoDropdown p {
   padding: 5px 15px;
@@ -73,6 +78,9 @@
 }
 .tagListDropdown p:hover,
 .repoDropdown p:hover {
+  background-color: var(--text-light);
+}
+.repoDropdown .repoListItem.active, .tagListDropdown .tagListItem.active {
   background-color: var(--text-light);
 }
 .tagListDropdown .error,
@@ -99,6 +107,9 @@
   display: flex;
   gap: 15px;
   align-items: center;
+}
+.registryDropdown .items.active {
+  background-color: var(--text-light);
 }
 .registryDropdown .items img {
   width: 20px;
