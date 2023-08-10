@@ -9,8 +9,8 @@ import (
 	"io"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/opencontainers/go-digest"
 	v1 "github.com/opencontainers/image-spec/specs-go/v1"
-	oras "oras.land/oras-go/v2"
 	"oras.land/oras-go/v2/content"
 
 	// "oras.land/oras-go/v2/registry"
@@ -22,54 +22,9 @@ func Manifest() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		a := ArtifactFromQuery(c.Queries())
 
-		artifact := a.Registry + a.Repository
-
-		repo, err := remote.NewRepository(artifact)
-		if err != nil {
-			errResponse := Err("Repository does not exist", fiber.StatusNotFound)
+		result, errResponse := PullManifest(a)
+		if errResponse.Message != "" {
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
-		}
-
-		ctx := context.Background()
-		var descriptor v1.Descriptor
-
-		descriptor, err = oras.Resolve(ctx, repo, a.Name, oras.DefaultResolveOptions)
-
-		if err != nil {
-			errResponse := Err("Cannot resolve descriptor with provided reference from the target", fiber.StatusNotFound)
-			return c.Status(errResponse.StatusCode).JSON(errResponse)
-		}
-
-		rc, err := repo.Fetch(ctx, descriptor)
-		if err != nil {
-			errResponse := Err("Failed to fetch content manifest", fiber.StatusNotFound)
-			return c.Status(errResponse.StatusCode).JSON(errResponse)
-		}
-		defer rc.Close()
-		pulledBlob, err := content.ReadAll(rc, descriptor)
-		if err != nil {
-			errResponse := Err("Failed to fetch content manifest", fiber.StatusNotFound)
-			return c.Status(errResponse.StatusCode).JSON(errResponse)
-		}
-
-		jsonData := string(pulledBlob)
-
-		var data map[string]interface{}
-		err = json.Unmarshal([]byte(jsonData), &data)
-		if err != nil {
-			errResponse := Err(err.Error(), fiber.StatusInternalServerError)
-			return c.Status(errResponse.StatusCode).JSON(errResponse)
-		}
-
-		result := ArtifactContent{
-			Artifact:  a.Name,
-			Manifest:  data,
-			Manifests: data["manifests"],
-			Configs:   data["config"],
-			Layers:    data["layers"],
-			Subjects:  data["subject"],
-			Digest:    string(descriptor.Digest),
-			MediaType: string(descriptor.MediaType),
 		}
 		return c.JSON(result)
 	}
@@ -127,6 +82,39 @@ func Referrers() fiber.Handler {
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
 
+		initial := 1
+		for {
+			data, err := PullManifest(a)
+			if err.Message != "" {
+				break
+			}
+
+			if initial == 1 {
+				referrers = []Referrer{
+					{
+						Ref: v1.Descriptor{
+							MediaType:    data.MediaType,
+							Digest:       digest.Digest(data.Digest),
+							Size:         data.Size,
+							ArtifactType: data.ArtifactType,
+						},
+						Nodes: referrers,
+					},
+				}
+				initial++
+			}
+
+			if data.Subject.Digest == "" {
+				break
+			}
+			dt := Referrer{
+				Ref:   data.Subject,
+				Nodes: referrers,
+			}
+			referrers = []Referrer{dt}
+			name := a.Registry + a.Repository
+			a.Name = name + ATSYMBOL + string(data.Subject.Digest)
+		}
 		return c.JSON(referrers)
 	}
 }
@@ -243,7 +231,7 @@ func Repos() fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		a := ArtifactFromQuery(c.Queries())
 		reg, err := remote.NewRegistry(a.Registry)
-		if(err != nil) {
+		if err != nil {
 			errResponse := Err("Registry does not exist", fiber.StatusNotFound)
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
@@ -257,7 +245,7 @@ func Repos() fiber.Handler {
 			return nil
 		})
 
-		if(err != nil) {
+		if err != nil {
 			errResponse := Err("Failed to fetch repositories", fiber.StatusNotFound)
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}

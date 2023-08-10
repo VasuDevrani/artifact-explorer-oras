@@ -445,7 +445,7 @@ function generateTree(treeData) {
       <li>
         <details>
           <summary> <img src="./static/images/githubColor.svg"/>${
-            node.ref.artifactType
+            node.ref.artifactType ? node.ref.artifactType : node.ref.mediaType
           }</summary>
           <ul>
             <li id="digest"><a href="/artifact?image=${reg.value}/${
