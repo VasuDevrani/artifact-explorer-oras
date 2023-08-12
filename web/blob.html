@@ -10,30 +10,41 @@
       </div>
       <div class="content hide">
         <div class="metaData">
-          <div class="ui labeled input">
-            <div class="ui label">Artifact Name:</div>
-            <input type="text" placeholder="not available" disabled />
-            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          <div class="head">
+            <div class="registry">
+              <img src="" alt="" />
+              <p></p>
+            </div>
+            <button onclick="downloadBlob()">Download</button>
           </div>
-          <div class="ui labeled input">
-            <div class="ui label">Content-Digest:</div>
-            <input type="text" placeholder="not available" disabled />
-            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          <div class="text">
+            <div class="textLabel color1">Full Reference:</div>
+            <div class="textContent">
+              <p>not available</p>
+              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+            </div>
           </div>
-          <div class="ui labeled input">
-            <div class="ui label">Content-Type:</div>
-            <input type="text" placeholder="not available" disabled />
-            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          <div class="text">
+            <div class="textLabel">Digest:</div>
+            <div class="textContent color2">
+              <p>not available</p>
+              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+            </div>
           </div>
-          <div class="ui labeled input">
-            <div class="ui label">Content-Length:</div>
-            <input type="text" placeholder="not available" disabled />
-            <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+          <div class="text">
+            <div class="textLabel">Media Type:</div>
+            <div class="textContent color1">
+              <p>not available</p>
+              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+            </div>
           </div>
-        </div>
-        <div class="buttonGroup">
-          <button onclick="downloadBlob()">Download</button>
-          <!-- <button>Copy</button> -->
+          <div class="text">
+            <div class="textLabel">Content Length:</div>
+            <div class="textContent color2">
+              <p>not available</p>
+              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+            </div>
+          </div>
         </div>
         <div class="blobContent"></div>
       </div>
@@ -42,12 +53,21 @@
     <script>
       const blobContent = document.querySelector(".content .blobContent");
       const metaData = document.querySelector(".content .metaData");
-      const ins = document.querySelectorAll(".content .metaData input");
+      const ins = document.querySelectorAll(
+        ".content .metaData .text .textContent p"
+      );
       const loader = document.querySelector(".spinner");
       const downloadBtn = document.querySelector(".buttonGroup > button");
       const copyIcons = document.querySelectorAll("#copyIcon");
 
       let artifactParams = null;
+      const regSrc = {
+        "docker.io": "./static/images/registryImages/image1.svg",
+        "mcr.microsoft.com": "./static/images/registryImages/image7.png",
+        "zot.io": "./static/images/registryImages/image4.svg",
+        "ghcr.io": "./static/images/registryImages/image6.svg",
+        "gcr.io": "./static/images/registryImages/image2.svg",
+      };
 
       function downloadBlob() {
         const apiURL = `/api/blob?registry=${artifactParams[1]}/&name=${artifactParams[2]}&digest=${artifactParams[3]}&type=download`;
@@ -109,17 +129,26 @@
             `/api/blob?registry=${matches[1]}/&name=${matches[2]}&digest=${matches[3]}`
           );
 
-          ins[0].value = data.Artifact ? data.Artifact : "not available";
+          ins[0].textContent = data.Artifact
+            ? data.Artifact
+            : "<p>not available</p>";
           copyIcons[0].setAttribute("data-value", data.Artifact || "");
-          ins[1].value = data.Digest ? data.Digest : "not available";
+          ins[1].textContent = data.Digest
+            ? data.Digest
+            : "<p>not available</p>";
           copyIcons[1].setAttribute("data-value", data.Digest || "");
-          ins[2].value = data.ContentType ? data.ContentType : "not available";
+          ins[2].textContent = data.ContentType
+            ? data.ContentType
+            : "<p>not available</p>";
           copyIcons[2].setAttribute("data-value", data.ContentType || "");
-          ins[3].value = data.ContentLength
+          ins[3].textContent = data.ContentLength
             ? data.ContentLength
-            : "not available";
+            : "<p>not available</p>";
           copyIcons[3].setAttribute("data-value", data.ContentLength || "");
 
+
+          document.querySelector(".registry img").src = regSrc[matches[1]];
+          document.querySelector(".registry p").textContent = matches[1];
           loader.classList.add("hide");
           document.querySelector(".content").classList.remove("hide");
           if (
