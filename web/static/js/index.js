@@ -674,7 +674,7 @@ class RightSideBlock {
       const sections = [
         { title: "Manifests", data: ar.Manifests, isBlob: false },
         { title: "Layers", data: ar.Layers, isBlob: true },
-        { title: "Configs", data: ar.Configs, isBlob: true },
+        { title: "Config", data: ar.Configs, isBlob: true },
         { title: "Subject", data: ar.Subject, isBlob: false },
       ];
 

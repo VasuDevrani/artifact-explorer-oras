@@ -3,6 +3,21 @@
 body {
   min-height: 100vh;
 }
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+}
+.registry {
+  display: flex;
+  gap: 1rem;
+  font-size: 24px;
+  font-weight: 700;
+}
+.registry img {
+  width: 30px;
+}
 .content {
   padding: 20px;
   display: flex;
@@ -22,7 +37,43 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  width: 80%;
+  width: 70%;
+  max-width: 1100px;
+  background: #fff;
+  padding: 15px;
+  word-wrap: break-word;
+  margin: auto;
+  border-radius: 10px;
+  border: 1px solid var(--secondary-color);
+}
+.textLabel {
+  font-size: var(--h3-size);
+  font-weight: 600;
+  padding: 0px 5px;
+}
+.textContent {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px;
+  margin: 10px 0px;
+  width: 100%;
+  font-weight: 500;
+  border-radius: 7px;
+  background: #2185d052;
+}
+.textContent.color1 {
+  background: #2185d052;
+}
+.textContent.color2 {
+  background-color: #ffeebba3;
+}
+.textContent p {
+  word-wrap: break-word;
+  width: 96%;
+  display: block;
+  margin-bottom: 0;
+  size: var(--p-size);
 }
 .metaData #copyIcon {
   width: 15px;
@@ -42,14 +93,16 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
+  margin: auto;
 }
 .blobContent {
   max-width: 80%;
-  max-height: 40vh;
+  max-height: 60vh;
   overflow: auto;
   border: 1px solid var(--secondary-color-light);
   padding: 10px;
   border-radius: 10px;
+  margin: auto;
 }
 .blobContent > pre {
   font-size: 16px;
@@ -61,25 +114,20 @@ body {
 .blobContent > pre > .json-mark {
   color: var(--secondary-color);
 }
-.blobContent > pre > .json-key{
+.blobContent > pre > .json-key {
   color: brown;
 }
-.blobContent > pre > .json-string{
+.blobContent > pre > .json-string {
   color: olive;
 }
-.blobContent > pre > .json-boolean, pre > .json-number{
+.blobContent > pre > .json-boolean,
+pre > .json-number {
   color: navy;
 }
-.buttonGroup > button:nth-child(1) {
+button {
   background: var(--secondary-color);
   padding: 10px 20px;
   border-radius: 5px !important;
-}
-.buttonGroup > button:nth-child(2) {
-  border: 2px solid var(--secondary-color-dark);
-  padding: 10px 20px;
-  color: var(--text-dark);
-  border-radius: 5px;
 }
 .spinner {
   display: flex;
@@ -87,6 +135,7 @@ body {
   margin-bottom: 3rem;
   flex-direction: column;
   gap: 2rem;
+  margin: auto;
 }
 .spinner.hide {
   display: none;
@@ -98,6 +147,9 @@ body {
 .spinner .skeletonLoader:nth-child(2) {
   width: 60%;
   height: 40vh;
+}
+.skeletonLoader {
+  margin: auto;
 }
 .error {
   margin: 3rem;
