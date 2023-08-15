@@ -438,26 +438,41 @@ function alterRightSide(contentId) {
 // ends
 
 // referrer Tree
-function generateTree(treeData) {
+const lightArr = ["lightgreen", "lightblue", "lightorange"];
+function generateTree(treeData, ct) {
+  if(!treeData.length) return "";
   let html = "";
-  treeData.forEach((node) => {
+  treeData.forEach((node, ind) => {
+    const children = generateTree(node.nodes, ct + 1);
     html += `
       <li>
-        <details>
-          <summary> <img src="./static/images/githubColor.svg"/>${
-            node.ref.artifactType ? node.ref.artifactType : node.ref.mediaType
-          }</summary>
-          <ul>
-            <li id="digest"><a href="/artifact?image=${reg.value}/${
-      repo.value
-    }@${node.ref.digest}" target="_blank">${node.ref.digest}</a></li>
-            ${node.nodes && generateTree(node.nodes)}
-          </ul>
+        <details open ${ct === 0 ? "class='pl-0'" : ""}>
+          <summary ${children === "" ? "class='no-marker'" : ""}> 
+          <div class="summary-content ${lightArr[ct % 3]}">
+          <div>
+          <div class="icon">
+            <img src="./static/images/githubColor.svg">
+          </div>
+              <div class="text">
+              <p>${
+                node.ref.artifactType
+                  ? node.ref.artifactType
+                  : node.ref.mediaType
+              }</p>
+              <p>
+              <a href="/artifact?image=${reg.value}/${repo.value}@${
+      node.ref.digest
+    }" target="_blank">${node.ref.digest}</a></p>
+            </div>
+            </div>
+          </div>
+          </summary> 
+          ${children}
         </details>
       </li>
     `;
   });
-  return html;
+  return `<ul ${ct === 0 ? "class='pl-0'" : ""}>${html}</ul>`;
 }
 // ends
 
@@ -755,7 +770,7 @@ class RightSideBlock {
       }
       const treeV = `
       <div id="treeV" class="view-item active">
-        <ul>${generateTree(ar.Referrers)}</ul>
+        ${generateTree(ar.Referrers, 0)}
       </div>`;
       treeView.innerHTML = `
       <div id="referrers">

@@ -80,7 +80,8 @@
 .repoDropdown p:hover {
   background-color: var(--text-light);
 }
-.repoDropdown .repoListItem.active, .tagListDropdown .tagListItem.active {
+.repoDropdown .repoListItem.active,
+.tagListDropdown .tagListItem.active {
   background-color: var(--text-light);
 }
 .tagListDropdown .error,
@@ -364,10 +365,19 @@
 
 #treeV ul {
   list-style: none;
-  width: fit-content;
+  /* width: fit-content; */
+  padding-right: 15px;
   position: relative;
-  padding-left: 20px;
+  padding-left: 30px;
 }
+
+#treeV ul.pl-0 {
+  padding-left: 5px;
+}
+
+#treeV details.pl-0 {
+  border-bottom: 2px solid var(--secondary-color-light);
+} 
 
 #treeV li {
   position: relative;
@@ -375,20 +385,72 @@
 
 #treeV li summary,
 #treeV li a {
-  border-top: 1px solid gray;
-  padding: 10px;
+  border-top: 2px solid var(--secondary-color-light);
+  padding: 15px 10px;
   cursor: pointer;
   position: relative;
+}
+
+#treeV li summary .summary-content {
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;
+  width: 95%;
+  word-break: break-all;
+}
+
+#treeV li summary .summary-content.lightgreen {
+  background-color: lightyellow;
+}
+#treeV li summary .summary-content.lightblue {
+  background-color: lightblue;
+}
+#treeV li summary .summary-content.lightorange {
+  background-color: #ffd9c0;
+}
+
+#treeV .no-marker {
+  display: block;
+  margin-left: 18px;
+}
+
+#treeV li summary .summary-content > div {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+#treeV li summary .icon {
+  width: 20px;
+  flex-shrink: 0;
+}
+
+#treeV li summary .text {
+  flex-grow: 1;
 }
 
 #treeV li a {
   text-decoration: none;
   padding-bottom: 10px;
   display: block;
+  padding-left: 0;
 }
 
 #treeV a:hover {
   text-decoration: underline;
+}
+
+.summary-content .text {
+  font-weight: 500;
+}
+
+.summary-content .text p {
+  margin: 0;
+}
+
+#treeV summary > div > div > div.text > p:nth-child(2) > a {
+  border-top: none;
+  padding-bottom: 5px;
 }
 
 /* Add vertical lines */
@@ -396,8 +458,8 @@
   content: "";
   position: absolute;
   top: 0;
-  left: -10px;
-  border-left: 1px solid gray;
+  left: -2px;
+  border-left: 2px solid var(--secondary-color-light);
   height: 100%;
 }
 
@@ -406,8 +468,8 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: -10px;
-  border-top: 1px solid gray;
+  left: -2px;
+  border-top: 2px solid var(--secondary-color-light);
   width: 10px;
 }
 
