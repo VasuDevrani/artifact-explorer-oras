@@ -566,13 +566,6 @@ function blockTemplate(table, json, views) {
       } view aa" onclick='switchView("table", "${views.id}", "aa")'>
         TABLE VIEW
       </a>
-      ${
-        views.id === "manifestTable"
-          ? `<div class="item">
-        <button onclick="downloadManifest()" id="manifestDownload">DOWNLOAD</button>
-      </div>`
-          : ""
-      }
     </div>
     </div>
     ${json}
@@ -631,21 +624,26 @@ class RightSideBlock {
   }
 
   prepareMetaData() {
-    let inp = document.querySelectorAll("#content_area .metaData .ui input");
+    let inp = document.querySelectorAll("#content_area .metaData1 .text .textContent p");
     let copyIcons = document.querySelectorAll(
-      "#content_area .metaData #copyIcon"
+      "#content_area .metaData1 #copyIcon"
     );
     const fields = [
       { key: "Artifact", index: 0 },
       { key: "Digest", index: 1 },
-      { key: "MediaType", index: 2 },
+      { key: "MediaType", index: 2 }
     ];
 
     fields.forEach((field) => {
       const value = ar[field.key] || "not available";
-      inp[field.index].value = value;
+      inp[field.index].textContent = value;
       copyIcons[field.index].setAttribute("data-value", value);
     });
+
+    const r = regList.find(item => item.name === ar.Artifact.split('/')[0]);
+    console.log(r)
+    document.querySelector(".metaData1 .registry img").src = r.image;
+    document.querySelector(".metaData1 .registry p").textContent = r.name;
   }
 
   async prepareManifestBlock() {
@@ -775,7 +773,6 @@ class RightSideBlock {
       treeView.innerHTML = `
       <div id="referrers">
         <div class="header">
-        <h1>Referrers</h1>
         <div class="ui tabular menu">
           <a class="item active view aa" onclick='switchView("treeV", "referrers", "aa")'>
             TREE VIEW
