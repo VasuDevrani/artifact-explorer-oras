@@ -36,4 +36,4 @@ jobs:
         uses: docker/build-push-action@v4
         with:
           push: true
-          tags: ${{ steps.prepare.outputs.ref }}
+          tags: ${{ steps.prepare.outputs.ref.lowercase }}
