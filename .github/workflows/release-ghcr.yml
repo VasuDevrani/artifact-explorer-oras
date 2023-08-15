@@ -4,15 +4,16 @@ on:
   push:
     tags:
       - v*
-    branches:
-      - test
 
 jobs:
+
   build:
+
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -31,7 +32,7 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-       - name: build and push
+      - name: build and push
         uses: docker/build-push-action@v4
         with:
           push: true
