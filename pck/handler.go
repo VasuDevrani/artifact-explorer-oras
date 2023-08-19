@@ -168,6 +168,17 @@ func BlobContent() fiber.Handler {
 			return c.Send(pulledBlob)
 		}
 
+		result := Blob{
+			Artifact:      a.Name,
+			ContentLength: descriptor.Size,
+			Digest:        string(descriptor.Digest),
+			ContentType:   string(descriptor.MediaType),
+		}
+
+		if(len(pulledBlob) == 0) {
+			return c.JSON(result)
+		}
+
 		if isJSON(pulledBlob) {
 			jsonData := string(pulledBlob)
 
@@ -177,14 +188,8 @@ func BlobContent() fiber.Handler {
 				errResponse := Err("Failed to fetch contents of artifact blob", fiber.StatusNotFound)
 				return c.Status(errResponse.StatusCode).JSON(errResponse)
 			}
-
-			result := Blob{
-				Artifact:      a.Name,
-				ContentLength: descriptor.Size,
-				Digest:        string(descriptor.Digest),
-				ContentType:   string(descriptor.MediaType),
-				Data:          data,
-			}
+			
+			result.Data = data
 			return c.JSON(result)
 		} else {
 			tarr := bytes.NewReader(pulledBlob)
