@@ -172,7 +172,7 @@ func PullManifest(a Artifact) (ArtifactContent, ErrorResponse) {
 
 	result := ArtifactContent{
 		Artifact:    a.Name,
-		Manifest:    data,
+		Manifest:    jsonData,
 		Manifests:   data["manifests"],
 		Configs:     data["config"],
 		Layers:      data["layers"],

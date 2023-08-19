@@ -927,7 +927,7 @@ class Artifact {
       this.Layers = data.Layers;
       this.Digest = data.Digest;
       this.Subject = data.Subject;
-      this.Manifest = data.Manifest;
+      this.Manifest = JSON.parse(data.Manifest);
       this.Size = data.Size;
       this.Annotations = data.Annotations;
 
