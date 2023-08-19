@@ -267,10 +267,7 @@
   cursor: pointer;
   position: relative;
 }
-#manifestBlock table tr #digest div {
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+
 #manifestBlock table tr #digest:hover div {
   width: 92%;
 }
@@ -285,6 +282,9 @@
 }
 #manifestBlock table tr #digest:hover #copyIcon {
   visibility: visible;
+}
+td, tr, th {
+  word-break: break-all;
 }
 #referrerBlock .info,
 #referrerBlock .error,
@@ -321,12 +321,6 @@
   max-height: 70vh;
   overflow: auto;
   width: 100%;
-}
-
-#table #mediaType:hover {
-  cursor: default;
-  overflow: auto;
-  text-overflow: inherit;
 }
 
 #jsonV > pre > span:nth-child(1) {

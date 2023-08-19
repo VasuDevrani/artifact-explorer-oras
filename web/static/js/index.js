@@ -602,7 +602,7 @@ function generateTable(tableData) {
 
   const table = `
     <div id="table">
-      <table class="ui fixed unstackable single line celled table">
+      <table class="ui fixed unstackable celled table">
         <thead>
           <tr>
             <th scope="col" colspan="4">Mediatype</th>
