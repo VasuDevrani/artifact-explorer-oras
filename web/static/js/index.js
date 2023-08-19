@@ -440,7 +440,7 @@ function alterRightSide(contentId) {
 // referrer Tree
 const lightArr = ["lightgreen", "lightblue", "lightorange"];
 function generateTree(treeData, ct) {
-  if(!treeData.length) return "";
+  if (!treeData.length) return "";
   let html = "";
   treeData.forEach((node, ind) => {
     const children = generateTree(node.nodes, ct + 1);
@@ -624,24 +624,27 @@ class RightSideBlock {
   }
 
   prepareMetaData() {
-    let inp = document.querySelectorAll("#content_area .metaData1 .text .textContent p");
+    let inp = document.querySelectorAll(
+      "#content_area .metaData1 .text .textContent p"
+    );
     let copyIcons = document.querySelectorAll(
       "#content_area .metaData1 #copyIcon"
     );
     const fields = [
       { key: "Artifact", index: 0 },
       { key: "Digest", index: 1 },
-      { key: "MediaType", index: 2 }
+      { key: "MediaType", index: 2 },
+      { key: "Size", index: 3 },
     ];
 
+    console.log(ar)
     fields.forEach((field) => {
       const value = ar[field.key] || "not available";
       inp[field.index].textContent = value;
       copyIcons[field.index].setAttribute("data-value", value);
     });
 
-    const r = regList.find(item => item.name === ar.Artifact.split('/')[0]);
-    console.log(r)
+    const r = regList.find((item) => item.name === ar.Artifact.split("/")[0]);
     document.querySelector(".metaData1 .registry img").src = r.image;
     document.querySelector(".metaData1 .registry p").textContent = r.name;
   }
@@ -825,6 +828,7 @@ class Artifact {
     this.Subject = null;
     this.Referrers = null;
     this.Manifest = null;
+    this.Size = null;
   }
 
   async setContents(artifact) {
@@ -847,6 +851,7 @@ class Artifact {
       this.Digest = data.Digest;
       this.Subject = data.Subject;
       this.Manifest = data.Manifest;
+      this.Size = data.Size;
 
       return null;
     } catch (err) {
@@ -858,6 +863,7 @@ class Artifact {
       this.Layers = null;
       this.Subject = null;
       this.Manifest = null;
+      this.Size = null;
       return err;
     }
   }

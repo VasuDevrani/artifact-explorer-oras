@@ -501,6 +501,9 @@ td, tr, th {
   margin-bottom: 0;
   size: var(--p-size);
 }
+.metaData1 .artifactName {
+  font-weight: 600;
+}
 .metaData1 #copyIcon {
   width: 15px;
   margin-left: 10px;
