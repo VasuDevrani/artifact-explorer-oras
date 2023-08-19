@@ -178,7 +178,12 @@ func PullManifest(a Artifact) (ArtifactContent, ErrorResponse) {
 		Digest:       string(descriptor.Digest),
 		MediaType:    string(descriptor.MediaType),
 		Size:         int64(descriptor.Size),
-		ArtifactType: descriptor.ArtifactType,
+	}
+
+	if descriptor.ArtifactType != "" {
+		result.ArtifactType = descriptor.ArtifactType
+	} else if configMediaType, ok := data["config"].(map[string]interface{})["mediaType"].(string); ok {
+		result.ArtifactType = configMediaType
 	}
 
 	if subjectData, ok := data["subject"].(map[string]interface{}); ok {
