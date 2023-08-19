@@ -6,6 +6,8 @@ const artifact = document.querySelector("#content_area");
 const rows = document.querySelectorAll("#table_digest");
 const tagListDropdown = document.querySelector(".inputs .dropdown > div");
 
+let currentActiveInput = reg;
+
 async function displayArtifactContents() {
   try {
     document
@@ -33,6 +35,9 @@ function onSubmit(currentPage) {
     const artifactUrl = `?image=${reg.value}/${repo.value}${
       tag.value.includes("sha256:") ? "@" : ":"
     }${tag.value}`;
+    if (tag.value.includes("sha256:")) {
+      changeDelimiter("@");
+    }
     window.history.pushState(
       {
         page: currentPage,
@@ -68,14 +73,14 @@ const regList = [
     image: "./static/images/registryImages/image7.png",
   },
 ];
-function hideRegistryDropdown() {
+function hideDropdown() {
   inputsParent.classList.remove("show-dropdown");
 }
 function showRegList() {
   let listItems = "";
   regList.map(
     (item) =>
-      (listItems += `<div data-name="${item.name}" class="items">
+      (listItems += `<div data-name="${item.name}" class="items dropdown-item">
       <img src="${item.image}" />
       <p>${item.name}</p>
     </div>`)
@@ -85,11 +90,13 @@ function showRegList() {
     .querySelectorAll(".inputs .dropdown > div .items")
     ?.forEach((regElement) =>
       regElement.addEventListener("click", () => {
+        if (reg.value !== regElement.getAttribute("data-name")) {
+          tag.value = "";
+          repo.value = "";
+        }
         reg.value = regElement.getAttribute("data-name");
-        tag.value = "";
-        repo.value = "";
         resizeInputs();
-        hideRegistryDropdown();
+        hideDropdown();
       })
     );
   inputsParent.classList.add("show-dropdown");
@@ -97,70 +104,70 @@ function showRegList() {
 // ends
 
 // enable keyboard interaction in dropdown
-let activeRegItemIndex = -1;
-let activeTagItemIndex = -1;
-let activeRepoItemIndex = -1;
+let activeItemIndex = -1;
 
 function resetItemIndex() {
-  activeRegItemIndex = -1;
-  activeTagItemIndex = -1;
-  activeRepoItemIndex = -1;
+  activeItemIndex = -1;
 }
 
-function setActiveItem(dropdown, index, selector) {
-  const items = dropdown.querySelectorAll(selector);
+function setActiveItem(dropdown, index, isEnterPressed = false) {
+  const items = dropdown.querySelectorAll(".dropdown-item");
   items.forEach((item, i) => {
     item.classList.toggle("active", i === index);
   });
 
   // Set the value based on the active index
   const activeItem = dropdown.querySelector(".active");
-  switch (selector) {
-    case ".items":
-      reg.value = activeItem?.textContent?.trim();
-      break;
-    case ".tagListItem":
-      tag.value = activeItem?.textContent?.trim();
-      break;
-    case ".repoListItem":
-      repo.value = activeItem?.textContent?.trim();
-      break;
-    default:
-      break;
+  const val = activeItem?.textContent?.trim();
+  if (currentActiveInput.classList.contains("i1")) {
+    if(isEnterPressed){
+      tag.value = "";
+      repo.value = "";
+    }
+    reg.value = val;
+  } else if (currentActiveInput.classList.contains("i2")) {
+    if(isEnterPressed){
+      tag.value = "";
+    }
+    repo.value = val;
+  } else if (currentActiveInput.classList.contains("i3")) {
+    tag.value = val;
   }
+  resizeInputs();
 }
 
 // function to handle the scrolling behavior for a specific dropdown
-function handleDropdownScroll(
-  dropdown,
-  event,
-  itemsSelector,
-  activeIndex,
-  setActiveIndex
-) {
-  if (dropdown.classList.contains("show")) {
-    const items = dropdown.querySelectorAll(itemsSelector);
+function handleDropdownScroll(dropdown, event, activeIndex, setActiveIndex) {
+  if (inputsParent.classList.contains("show-dropdown")) {
+    const items = dropdown.querySelectorAll(".dropdown-item");
     if (event.key === "ArrowDown") {
       event.preventDefault();
       activeIndex = (activeIndex + 1) % items.length;
       setActiveIndex(activeIndex);
-      scrollToSelectedItem(dropdown, activeIndex, itemsSelector);
-      setActiveItem(dropdown, activeIndex, itemsSelector);
+      scrollToSelectedItem(dropdown, activeIndex);
+      setActiveItem(dropdown, activeIndex);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       activeIndex = (activeIndex - 1 + items.length) % items.length;
       setActiveIndex(activeIndex);
-      scrollToSelectedItem(dropdown, activeIndex, itemsSelector);
-      setActiveItem(dropdown, activeIndex, itemsSelector);
+      scrollToSelectedItem(dropdown, activeIndex);
+      setActiveItem(dropdown, activeIndex);
     } else if (event.key === "Enter") {
       event.preventDefault();
-      setActiveItem(dropdown, activeIndex, itemsSelector);
+      hideDropdown();
+      if (activeIndex === -1) {
+        return;
+      }
+      setActiveItem(dropdown, activeIndex, true);
+      if (currentActiveInput.classList.contains("i3")) {
+        changeDelimiter(":");
+      }
     }
   }
 }
 
-function scrollToSelectedItem(dropdown, index, selector) {
-  const items = dropdown.querySelectorAll(selector);
+function scrollToSelectedItem(dropdown, index) {
+  const items = dropdown.querySelectorAll(".dropdown-item");
   if (index >= 0 && index < items.length) {
     items[index].scrollIntoView({
       behavior: "smooth",
@@ -170,33 +177,9 @@ function scrollToSelectedItem(dropdown, index, selector) {
 }
 
 document.addEventListener("keydown", (event) => {
-  handleDropdownScroll(
-    tagListDropdown,
-    event,
-    ".items",
-    activeRegItemIndex,
-    (index) => {
-      activeRegItemIndex = index;
-    }
-  );
-  handleDropdownScroll(
-    tagListDropdown,
-    event,
-    ".tagListItem",
-    activeTagItemIndex,
-    (index) => {
-      activeTagItemIndex = index;
-    }
-  );
-  handleDropdownScroll(
-    tagListDropdown,
-    event,
-    ".repoListItem",
-    activeRepoItemIndex,
-    (index) => {
-      activeRepoItemIndex = index;
-    }
-  );
+  handleDropdownScroll(tagListDropdown, event, activeItemIndex, (index) => {
+    activeItemIndex = index;
+  });
 });
 
 // list javascript
@@ -213,6 +196,10 @@ function fetchTagList() {
     fetch(URL)
       .then((res) => res.json())
       .then((data) => {
+        if(data.status === 404) {
+          tagList = [];
+          throw new Error(data.message);
+        }
         tagList = data;
         updateTagList();
         resolve();
@@ -224,6 +211,7 @@ function fetchTagList() {
             <div>Failed to fetch tags</div>
           </div>
         `;
+        console.log(err)
         reject(err);
       });
   });
@@ -242,7 +230,9 @@ function updateTagList() {
     return;
   }
   let html = "";
-  filterList.map((item) => (html += `<p class="tagListItem">${item}</p>`));
+  filterList.map(
+    (item) => (html += `<p class="tagListItem dropdown-item">${item}</p>`)
+  );
 
   tagListDropdown.innerHTML = html;
   isRepoRegChanged = false;
@@ -251,7 +241,7 @@ function updateTagList() {
     ?.forEach((tagElement) =>
       tagElement.addEventListener("click", () => {
         tag.value = tagElement.innerHTML;
-        changeDelimiter(":")
+        changeDelimiter(":");
         resizeInputs();
         updateTagList();
         inputsParent.classList.remove("show-dropdown");
@@ -302,17 +292,21 @@ function updateRepoList() {
     return;
   }
   let html = "";
-  filterList.map((item) => (html += `<p class="repoListItem">${item}</p>`));
+  filterList.map(
+    (item) => (html += `<p class="repoListItem dropdown-item">${item}</p>`)
+  );
 
   tagListDropdown.innerHTML = html;
   document
     .querySelectorAll(".inputs .dropdown > div > p")
     ?.forEach((repoElement) =>
       repoElement.addEventListener("click", () => {
+        if (repo.value !== repoElement.innerHTML) {
+          tag.value = "";
+        }
         repo.value = repoElement.innerHTML;
         resizeInputs();
         updateRepoList();
-        tag.value = "";
         inputsParent.classList.remove("show-dropdown");
       })
     );
@@ -483,8 +477,12 @@ function downloadManifest() {
   dwnBtn.textContent = "DOWNLOAD";
 }
 
-function redirectByDigest(URL) {
-  window.open(URL, "_blank");
+function redirectByDigest(URL, ind) {
+  if (ind === 0) {
+    window.location.href = URL;
+  } else if (ind === 1) {
+    window.open(URL, "_blank");
+  }
 }
 
 function addHyperlinks() {
@@ -499,10 +497,13 @@ function addHyperlinks() {
     const mediaType = mediaTypeSpan
       ? mediaTypeSpan.textContent.trim().replace(/"/g, "")
       : "";
+
     const redirectURL = `/redirect?mediatype=${encodeURIComponent(
       mediaType
     )}&image=${reg.value}/${repo.value}@${match.replace(/"/g, "")}`;
-    return `<span id="jsonDigest" onclick="redirectByDigest('${redirectURL}')">${match}</span>`;
+    return `<span id="jsonDigest" onclick="redirectByDigest('${redirectURL}', ${
+      mediaType.includes("manifest") ? 0 : 1
+    })">${match}</span>`;
   });
   jsonContent.innerHTML = updatedHtmlContent;
 }
@@ -635,7 +636,9 @@ function generateTable(tableData) {
           <div id="digest">
             <a href="${tableData.isBlob ? "/blob?layer=" : "/artifact?image="}${
       reg.value
-    }/${repo.value}@${item.digest}" target="_blank">
+    }/${repo.value}@${item.digest}" ${
+      tableData.isBlob ? 'target="_blank"' : ""
+    }>
               ${item.digest}
             </a>
           </div>
@@ -867,21 +870,31 @@ const dropdown = document.querySelector(".dropdown");
 const span2 = document.querySelector(".tagSpan");
 
 function updateDropdownPosition(input) {
+  currentActiveInput = input;
+  console.log(input)
+  resetItemIndex();
+  if (
+    (input.classList.contains("i2") && reg.value !== "mcr.microsoft.com") ||
+    (input.classList.contains("i3") && (!reg.value || !repo.value))
+  ) {
+    hideDropdown();
+    return;
+  }
   const inputLeftOffset = input.offsetLeft;
   dropdown.style.left = inputLeftOffset + "px";
 }
-function changeDelimiter (symb) {
+function changeDelimiter(symb) {
   span2.textContent = symb;
 }
 function resizeInputs() {
   inputs.forEach(function (input) {
     if (input.classList.contains("i1")) {
       input.style.width = "75px";
-    } else {
+    } else if (input.classList.contains("i2")) {
       input.style.width = "95px";
     }
     input.style.width = `${
-      Math.min(input.scrollWidth, input.parentElement.offsetWidth * 0.3) + 1
+      Math.min(input.scrollWidth, input.parentElement.offsetWidth * 0.5) + 2
     }px`;
   });
 }
@@ -920,8 +933,16 @@ inputs.forEach((input, index) => {
     if (event.target.classList.contains("i1")) {
       showRegList();
     } else if (event.target.classList.contains("i2")) {
+      if (reg.value !== "mcr.microsoft.com") {
+        hideDropdown();
+        return;
+      }
       listRepos();
     } else if (event.target.classList.contains("i3")) {
+      if (!reg.value || !repo.value) {
+        hideDropdown();
+        return;
+      }
       listTags();
     }
     updateDropdownPosition(this);
@@ -929,20 +950,18 @@ inputs.forEach((input, index) => {
 
   input.addEventListener("keydown", function (event) {
     if (event.key === "Tab") {
+      event.preventDefault();
       updateDropdownPosition(this);
+      if (index === 0) {
+        inputs[1].focus();
+      } else if (index === 1) {
+        inputs[2].focus();
+      }
     }
   });
 
   input.addEventListener("input", function () {
-    if (input.classList.contains("i1")) {
-      this.style.width = "75px";
-    } else {
-      this.style.width = "95px";
-    }
-    this.style.width = `${
-      Math.min(this.scrollWidth, this.parentElement.offsetWidth * 0.3) + 1
-    }px`;
-
+    resizeInputs();
     if (input.classList.contains("i2")) {
       const nextSpan = input.nextElementSibling;
       const thirdInput = input.nextElementSibling.nextElementSibling;
@@ -1111,25 +1130,41 @@ document.addEventListener("click", (event) => {
   }
 });
 
+function updateInputs(image) {
+  const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
+  const matches = image.match(regex);
+
+  const registry = matches[1] || "";
+  const repository = matches[2] || "";
+  let tagOrDigest = matches[3] || matches[5] || "";
+
+  if (!matches[3] && !matches[5]) {
+    tagOrDigest = "latest";
+    changeDelimiter(":");
+  } else if (!matches[3]) {
+    changeDelimiter("@");
+  } else if (!matches[5]) {
+    changeDelimiter(":");
+  }
+
+  reg.value = registry;
+  repo.value = repository;
+  tag.value = tagOrDigest;
+}
 function handleNavigation() {
   const pathname = window.location.pathname;
   const searchParams = new URLSearchParams(window.location.search);
   const image = searchParams.get("image");
 
   if (pathname.includes("/artifact") && image) {
-    const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
-    const matches = image.match(regex);
-
-    reg.value = matches[1];
-    repo.value = matches[2];
-    tag.value = matches[3];
+    updateInputs(image);
+    resizeInputs();
 
     artifact.classList.remove("hide");
     artifact.classList.add("show");
 
     rsb.isManifestPrepared = false;
     try {
-      fetchTagList();
       displayArtifactContents();
     } catch (error) {
       console.error(error);
@@ -1146,24 +1181,8 @@ document.addEventListener("DOMContentLoaded", async function () {
   const image = new URLSearchParams(window.location.search).get("image");
 
   if (!pathname.substring(pathname.lastIndexOf("/") + 1) || !image) return;
-  const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
-  const matches = image.match(regex);
-
-  reg.value = `${matches[1]}`;
-  repo.value = matches[2];
-  tag.value = matches[3];
-
-  inputs.forEach(function (input) {
-    if (input.classList.contains("i1")) {
-      input.style.width = "75px";
-    } else {
-      input.style.width = "95px";
-    }
-    input.style.width = `${Math.min(
-      input.scrollWidth,
-      input.parentElement.offsetWidth * 0.3
-    )}px`;
-  });
+  updateInputs(image);
+  resizeInputs();
   artifact.classList.remove("hide");
   artifact.classList.add("show");
 
