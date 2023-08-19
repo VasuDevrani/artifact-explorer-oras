@@ -599,13 +599,58 @@ function generateTable(tableData) {
       <table class="ui fixed unstackable celled table">
         <thead>
           <tr>
-            <th scope="col">Key</th>
-            <th scope="col">Value</th>
+            <th>Key</th>
+            <th>Value</th>
           </tr>
         </thead>
         ${records}
       </table>
     </div>`;
+
+    return table;
+  }
+
+  if (tableData.title === "Manifests") {
+    data.forEach((item) => {
+      records += `
+        <tr>
+          <td colspan="3" id="mediaType">${item.mediaType}</td>
+          <td>${item.size}</td>
+          <td colspan="3" id="digest">
+            <div id="digest">
+              <a href="${
+                tableData.isBlob ? "/blob?layer=" : "/artifact?image="
+              }${reg.value}/${repo.value}@${item.digest}" target="_blank">
+                ${item.digest}
+              </a>
+            </div>
+            <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${
+              item.digest
+            }">
+          </td>
+          <td>${item.platform.architecture}</td>
+          <td>${item.platform.os}</td>
+        </tr>`;
+    });
+
+    const table = `
+      <div id="table">
+        <table class="ui fixed unstackable celled table">
+          <thead>
+            <tr>
+              <th colspan="3" rowspan="2">Mediatype</th>
+              <th rowspan="2">Size</th>
+              <th colspan="3" rowspan="2">Digest</th>
+              <th colspan="2">Platform</th>
+            </tr>
+            <tr>
+              <th>Architecture</th>
+              <th>OS</th>
+            </tr>
+          </thead>
+          ${records}
+        </table>
+      </div>`;
 
     return table;
   }
@@ -635,9 +680,9 @@ function generateTable(tableData) {
       <table class="ui fixed unstackable celled table">
         <thead>
           <tr>
-            <th scope="col" colspan="4">Mediatype</th>
-            <th scope="col">Size</th>
-            <th scope="col" colspan="3">Digest</th>
+            <th colspan="4">Mediatype</th>
+            <th>Size</th>
+            <th colspan="3">Digest</th>
           </tr>
         </thead>
         ${records}
