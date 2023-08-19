@@ -580,6 +580,36 @@ function generateTable(tableData) {
     ? tableData.data
     : [tableData.data];
 
+  if (tableData.title === "Annotations") {
+    data.forEach((item) => {
+      for (const key in item) {
+        if (item.hasOwnProperty(key)) {
+          const value = item[key];
+          records += `
+          <tr>
+            <td>${key}</td>
+            <td>${value}</td>
+          </tr>`;
+        }
+      }
+    });
+
+    const table = `
+    <div id="table">
+      <table class="ui fixed unstackable celled table">
+        <thead>
+          <tr>
+            <th scope="col">Key</th>
+            <th scope="col">Value</th>
+          </tr>
+        </thead>
+        ${records}
+      </table>
+    </div>`;
+
+    return table;
+  }
+
   data.forEach((item) => {
     records += `
       <tr>
@@ -637,7 +667,7 @@ class RightSideBlock {
       { key: "Size", index: 3 },
     ];
 
-    console.log(ar)
+    console.log(ar);
     fields.forEach((field) => {
       const value = ar[field.key] || "not available";
       inp[field.index].textContent = value;
@@ -696,13 +726,14 @@ class RightSideBlock {
           data: ar.Subject.digest ? ar.Subject : null,
           isBlob: false,
         },
+        { title: "Annotations", data: ar.Annotations, isBlob: false },
       ];
 
       let tableView = sections
         .filter((section) => section.data)
         .map(
           (section) => `
-              <h1>${section.title}</h1>
+              <h2>${section.title}</h2>
               ${generateTable(section)}
           `
         )
@@ -827,6 +858,7 @@ class Artifact {
     this.Layers = null;
     this.Subject = null;
     this.Referrers = null;
+    this.Annotations = null;
     this.Manifest = null;
     this.Size = null;
   }
@@ -852,6 +884,7 @@ class Artifact {
       this.Subject = data.Subject;
       this.Manifest = data.Manifest;
       this.Size = data.Size;
+      this.Annotations = data.Annotations;
 
       return null;
     } catch (err) {
@@ -864,6 +897,7 @@ class Artifact {
       this.Subject = null;
       this.Manifest = null;
       this.Size = null;
+      this.Annotations = null;
       return err;
     }
   }

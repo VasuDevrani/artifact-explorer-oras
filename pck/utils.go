@@ -31,6 +31,7 @@ type ArtifactContent struct {
 	Manifests    interface{}
 	Configs      interface{}
 	Layers       interface{}
+	Annotations  interface{}
 }
 
 type Artifact struct {
@@ -170,14 +171,15 @@ func PullManifest(a Artifact) (ArtifactContent, ErrorResponse) {
 	}
 
 	result := ArtifactContent{
-		Artifact:  a.Name,
-		Manifest:  data,
-		Manifests: data["manifests"],
-		Configs:   data["config"],
-		Layers:    data["layers"],
-		Digest:    string(descriptor.Digest),
-		MediaType: string(descriptor.MediaType),
-		Size:      int64(descriptor.Size),
+		Artifact:    a.Name,
+		Manifest:    data,
+		Manifests:   data["manifests"],
+		Configs:     data["config"],
+		Layers:      data["layers"],
+		Annotations: data["annotations"],
+		Digest:      string(descriptor.Digest),
+		MediaType:   string(descriptor.MediaType),
+		Size:        int64(descriptor.Size),
 	}
 
 	if descriptor.ArtifactType != "" {
