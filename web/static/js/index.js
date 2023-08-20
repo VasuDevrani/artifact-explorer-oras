@@ -120,13 +120,13 @@ function setActiveItem(dropdown, index, isEnterPressed = false) {
   const activeItem = dropdown.querySelector(".active");
   const val = activeItem?.textContent?.trim();
   if (currentActiveInput.classList.contains("i1")) {
-    if(isEnterPressed){
+    if (isEnterPressed) {
       tag.value = "";
       repo.value = "";
     }
     reg.value = val;
   } else if (currentActiveInput.classList.contains("i2")) {
-    if(isEnterPressed){
+    if (isEnterPressed) {
       tag.value = "";
     }
     repo.value = val;
@@ -196,7 +196,7 @@ function fetchTagList() {
     fetch(URL)
       .then((res) => res.json())
       .then((data) => {
-        if(data.status === 404) {
+        if (data.status === 404) {
           tagList = [];
           throw new Error(data.message);
         }
@@ -211,7 +211,7 @@ function fetchTagList() {
             <div>Failed to fetch tags</div>
           </div>
         `;
-        console.log(err)
+        console.log(err);
         reject(err);
       });
   });
@@ -338,15 +338,15 @@ reg.addEventListener("change", () => {
   isRepoRegChanged = true;
 });
 tag.addEventListener("change", () => {
-  if(!tag.value) changeDelimiter("");
-})
+  if (!tag.value) changeDelimiter("");
+});
 tag.addEventListener("input", () => {
-  if(tag.value.includes("sha256:")) {
+  if (tag.value.includes("sha256:")) {
     changeDelimiter("@");
   } else {
     changeDelimiter(":");
   }
-})
+});
 // ends
 
 // copyText
@@ -415,7 +415,7 @@ function alterRightSide(contentId) {
 // referrer Tree
 const lightArr = ["lightgreen", "lightblue", "lightorange"];
 function generateTree(treeData, ct) {
-  if  (!treeData.length) return "";
+  if (!treeData.length) return "";
   let html = "";
   treeData.forEach((node, ind) => {
     const children = generateTree(node.nodes, ct + 1);
@@ -470,21 +470,26 @@ function switchView(contentId, elementId, headClass) {
 }
 
 function downloadManifest() {
-  const dwnBtn = document.querySelector("#manifestDownload");
+  const fileInput = document.querySelector("#manifestFileName");
+  const fileName = fileInput.value;
+  fileInput.value = "";
 
-  dwnBtn.textContent = "loading...";
   const jsonString = JSON.stringify(ar.Manifest, null, 2);
 
   const blob = new Blob([jsonString], { type: "application/json" });
   const downloadLink = document.createElement("a");
   downloadLink.href = URL.createObjectURL(blob);
-  downloadLink.download = "manifests.json";
+  downloadLink.download = "manifest.json";
+  if (fileName) {
+    downloadLink.download = fileName.endsWith(".json")
+      ? fileName
+      : `${fileName}.json`;
+  }
 
   document.body.appendChild(downloadLink);
   downloadLink.click();
 
   document.body.removeChild(downloadLink);
-  dwnBtn.textContent = "DOWNLOAD";
 }
 
 function redirectByDigest(URL, ind) {
@@ -683,7 +688,9 @@ class RightSideBlock {
   }
 
   prepareMetaData() {
-    let inp = document.querySelectorAll("#content_area .metaData1 .text .textContent p");
+    let inp = document.querySelectorAll(
+      "#content_area .metaData1 .text .textContent p"
+    );
     let copyIcons = document.querySelectorAll(
       "#content_area .metaData1 #copyIcon"
     );
@@ -930,8 +937,10 @@ inputs.forEach((input, index) => {
       inputs[1].value = repository;
       inputs[2].value = tagOrDigest;
     } else {
-      if (currentActiveInput.classList.contains("i1")) inputs[0].value = pastedText;
-      else if (currentActiveInput.classList.contains("i2")) inputs[1].value = pastedText;
+      if (currentActiveInput.classList.contains("i1"))
+        inputs[0].value = pastedText;
+      else if (currentActiveInput.classList.contains("i2"))
+        inputs[1].value = pastedText;
       else inputs[2].value = pastedText;
     }
     resizeInputs();
