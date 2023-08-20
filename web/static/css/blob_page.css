@@ -46,6 +46,9 @@ body {
   border-radius: 10px;
   border: 1px solid var(--secondary-color);
 }
+.metaData button {
+  background-color: var(--primary-color-light);
+}
 .textLabel {
   font-size: var(--h3-size);
   font-weight: 600;

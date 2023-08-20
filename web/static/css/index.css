@@ -261,3 +261,20 @@ nav #logo {
 .show {
   display: flex;
 }
+
+.modal #modalLabel {
+  font-family: "Poppins" !important;
+}
+
+.modal input {
+  padding: 10px;
+  width: 100%;
+  border: 1px solid var(--secondary-color-light);
+  outline: none;
+  border-radius: 5px;
+}
+
+.modal #dwnBtn {
+  background-color: var(--primary-color-light);
+  font-weight: 500;
+}
