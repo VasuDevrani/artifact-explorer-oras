@@ -1,43 +1,25 @@
-{{ define "form" }}
-<div class="artifactInputForm">
-  <div>
-    <div class="form-floating mb-3" id="registry">
-      <input
-        type="text"
-        class="form-control"
-        id="floatingInput"
-        placeholder="library/nginx"
-        onfocus="showRegList()"
-        onclick="showRegList()"
-      />
-      <label for="floatingInput">Registry</label>
-      <div class="registryDropdown hide"></div>
-    </div>
-
-    <div class="form-floating mb-3" id="repository">
-      <input
-        type="text"
-        class="form-control"
-        id="floatingInput"
-        placeholder="repository"
-        oninput="updateRepoList()"
-        onfocus="listRepos()"
-      />
-      <label for="floatingInput">Repository</label>
-      <div class="repoDropdown hide"></div>
-    </div>
-  </div>
-  <div class="form-floating mb-3" id="digestortag">
-    <input
-      type="text"
-      class="form-control"
-      id="floatingInput"
-      placeholder="tag or digest"
-      oninput="updateTagList()"
-      onfocus="listTags()"
-    />
-    <label for="floatingInput">Tag or Digest</label>
-    <div class="tagListDropdown hide"></div>
-  </div>
+{{ define "inputForm" }}
+<div class="inputs">
+  <input
+    type="text"
+    class="i1"
+    placeholder="registry"
+    onclick="showRegList()"
+  />
+  <span>/</span>
+  <input
+    type="text"
+    class="i2"
+    placeholder="repository"
+    oninput="updateRepoList()"
+  />
+  <span class="tagSpan"></span>
+  <input
+    type="text"
+    class="i3"
+    placeholder="tag or digest"
+    oninput="updateTagList()"
+  />
+  <div class="dropdown"><div></div></div>
 </div>
 {{ end }}

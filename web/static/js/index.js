@@ -1,8 +1,12 @@
-const reg = document.querySelector(".artifactInputForm #registry input");
-const repo = document.querySelector(".artifactInputForm #repository input");
-const tag = document.querySelector(".artifactInputForm #digestortag input");
+const reg = document.querySelector(".inputs .i1");
+const repo = document.querySelector(".inputs .i2");
+const tag = document.querySelector(".inputs .i3");
+const inputsParent = document.querySelector(".inputs");
 const artifact = document.querySelector("#content_area");
 const rows = document.querySelectorAll("#table_digest");
+const tagListDropdown = document.querySelector(".inputs .dropdown > div");
+
+let currentActiveInput = reg;
 
 async function displayArtifactContents() {
   try {
@@ -31,6 +35,9 @@ function onSubmit(currentPage) {
     const artifactUrl = `?image=${reg.value}/${repo.value}${
       tag.value.includes("sha256:") ? "@" : ":"
     }${tag.value}`;
+    if (tag.value.includes("sha256:")) {
+      changeDelimiter("@");
+    }
     window.history.pushState(
       {
         page: currentPage,
@@ -41,37 +48,6 @@ function onSubmit(currentPage) {
     );
     displayArtifactContents();
   }
-}
-
-// handlePasteOfArtifactReference
-reg.addEventListener("paste", (event) => handlePastedString(event, "1"));
-repo.addEventListener("paste", (event) => handlePastedString(event, "2"));
-tag.addEventListener("paste", (event) => handlePastedString(event, "3"));
-
-function handlePastedString(event, id) {
-  const pastedText = event.clipboardData.getData("text/plain");
-  const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
-  const matches = pastedText.match(regex);
-
-  if (matches) {
-    const registry = matches[1] || "";
-    const repository = matches[2] || "";
-    let tagOrDigest = matches[3] || matches[5] || "";
-
-    if (!matches[3] && !matches[5]) tagOrDigest = "latest";
-
-    reg.value = registry;
-    repo.value = repository;
-    tag.value = tagOrDigest;
-  } else {
-    if (id === "1") reg.value = pastedText;
-    else if (id === "2") repo.value = pastedText;
-    else tag.value = pastedText;
-  }
-  isRepoRegChanged = true;
-  hideRegistryDropdown();
-  fetchTagList();
-  event.preventDefault(); // Prevent the default paste behavior
 }
 
 // list dropdown javascript
@@ -97,101 +73,101 @@ const regList = [
     image: "./static/images/registryImages/image7.png",
   },
 ];
-const regDropdown = document.querySelector(
-  ".artifactInputForm .registryDropdown"
-);
-function hideRegistryDropdown() {
-  regDropdown.classList.remove("show");
-  regDropdown.classList.add("hide");
+function hideDropdown() {
+  inputsParent.classList.remove("show-dropdown");
 }
 function showRegList() {
-  regDropdown.classList.remove("hide");
-  regDropdown.classList.add("show");
   let listItems = "";
   regList.map(
     (item) =>
-      (listItems += `<div data-name="${item.name}" class="items">
+      (listItems += `<div data-name="${item.name}" class="items dropdown-item">
       <img src="${item.image}" />
       <p>${item.name}</p>
     </div>`)
   );
-  regDropdown.innerHTML = listItems;
+  tagListDropdown.innerHTML = listItems;
   document
-    .querySelectorAll(".artifactInputForm .registryDropdown .items")
+    .querySelectorAll(".inputs .dropdown > div .items")
     ?.forEach((regElement) =>
       regElement.addEventListener("click", () => {
+        if (reg.value !== regElement.getAttribute("data-name")) {
+          tag.value = "";
+          repo.value = "";
+        }
         reg.value = regElement.getAttribute("data-name");
-        hideRegistryDropdown();
+        resizeInputs();
+        hideDropdown();
       })
     );
+  inputsParent.classList.add("show-dropdown");
 }
 // ends
 
 // enable keyboard interaction in dropdown
-let activeRegItemIndex = -1;
-let activeTagItemIndex = -1;
-let activeRepoItemIndex = -1;
+let activeItemIndex = -1;
 
 function resetItemIndex() {
-  activeRegItemIndex = -1;
-  activeTagItemIndex = -1;
-  activeRepoItemIndex = -1;
+  activeItemIndex = -1;
 }
 
-function setActiveItem(dropdown, index, selector) {
-  const items = dropdown.querySelectorAll(selector);
+function setActiveItem(dropdown, index, isEnterPressed = false) {
+  const items = dropdown.querySelectorAll(".dropdown-item");
   items.forEach((item, i) => {
     item.classList.toggle("active", i === index);
   });
 
   // Set the value based on the active index
   const activeItem = dropdown.querySelector(".active");
-  switch (selector) {
-    case ".items":
-      reg.value = activeItem?.textContent?.trim();
-      break;
-    case ".tagListItem":
-      tag.value = activeItem?.textContent?.trim();
-      break;
-    case ".repoListItem":
-      repo.value = activeItem?.textContent?.trim();
-      break;
-    default:
-      break;
+  const val = activeItem?.textContent?.trim();
+  if (currentActiveInput.classList.contains("i1")) {
+    if(isEnterPressed){
+      tag.value = "";
+      repo.value = "";
+    }
+    reg.value = val;
+  } else if (currentActiveInput.classList.contains("i2")) {
+    if(isEnterPressed){
+      tag.value = "";
+    }
+    repo.value = val;
+  } else if (currentActiveInput.classList.contains("i3")) {
+    tag.value = val;
   }
+  resizeInputs();
 }
 
 // function to handle the scrolling behavior for a specific dropdown
-function handleDropdownScroll(
-  dropdown,
-  event,
-  itemsSelector,
-  activeIndex,
-  setActiveIndex
-) {
-  if (dropdown.classList.contains("show")) {
-    const items = dropdown.querySelectorAll(itemsSelector);
+function handleDropdownScroll(dropdown, event, activeIndex, setActiveIndex) {
+  if (inputsParent.classList.contains("show-dropdown")) {
+    const items = dropdown.querySelectorAll(".dropdown-item");
     if (event.key === "ArrowDown") {
       event.preventDefault();
       activeIndex = (activeIndex + 1) % items.length;
       setActiveIndex(activeIndex);
-      scrollToSelectedItem(dropdown, activeIndex, itemsSelector);
-      setActiveItem(dropdown, activeIndex, itemsSelector);
+      scrollToSelectedItem(dropdown, activeIndex);
+      setActiveItem(dropdown, activeIndex);
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       activeIndex = (activeIndex - 1 + items.length) % items.length;
       setActiveIndex(activeIndex);
-      scrollToSelectedItem(dropdown, activeIndex, itemsSelector);
-      setActiveItem(dropdown, activeIndex, itemsSelector);
+      scrollToSelectedItem(dropdown, activeIndex);
+      setActiveItem(dropdown, activeIndex);
     } else if (event.key === "Enter") {
       event.preventDefault();
-      setActiveItem(dropdown, activeIndex, itemsSelector);
+      hideDropdown();
+      if (activeIndex === -1) {
+        return;
+      }
+      setActiveItem(dropdown, activeIndex, true);
+      if (currentActiveInput.classList.contains("i3")) {
+        changeDelimiter(":");
+      }
     }
   }
 }
 
-function scrollToSelectedItem(dropdown, index, selector) {
-  const items = dropdown.querySelectorAll(selector);
+function scrollToSelectedItem(dropdown, index) {
+  const items = dropdown.querySelectorAll(".dropdown-item");
   if (index >= 0 && index < items.length) {
     items[index].scrollIntoView({
       behavior: "smooth",
@@ -201,41 +177,12 @@ function scrollToSelectedItem(dropdown, index, selector) {
 }
 
 document.addEventListener("keydown", (event) => {
-  handleDropdownScroll(
-    regDropdown,
-    event,
-    ".items",
-    activeRegItemIndex,
-    (index) => {
-      activeRegItemIndex = index;
-    }
-  );
-  handleDropdownScroll(
-    tagListDropdown,
-    event,
-    ".tagListItem",
-    activeTagItemIndex,
-    (index) => {
-      activeTagItemIndex = index;
-    }
-  );
-  handleDropdownScroll(
-    repoDropdown,
-    event,
-    ".repoListItem",
-    activeRepoItemIndex,
-    (index) => {
-      activeRepoItemIndex = index;
-    }
-  );
+  handleDropdownScroll(tagListDropdown, event, activeItemIndex, (index) => {
+    activeItemIndex = index;
+  });
 });
 
 // list javascript
-const tagListDropdown = document.querySelector(
-  ".artifactInputForm .tagListDropdown"
-);
-const repoDropdown = document.querySelector(".artifactInputForm .repoDropdown");
-
 let tagList = [];
 let repoList = [];
 let isRepoRegChanged = false;
@@ -244,10 +191,15 @@ function fetchTagList() {
   return new Promise((resolve, reject) => {
     tagListDropdown.innerHTML =
       '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
+    inputsParent.classList.add("show-dropdown");
     const URL = `/api/tags?registry=${reg.value}/&name=${repo.value}`;
     fetch(URL)
       .then((res) => res.json())
       .then((data) => {
+        if(data.status === 404) {
+          tagList = [];
+          throw new Error(data.message);
+        }
         tagList = data;
         updateTagList();
         resolve();
@@ -259,6 +211,7 @@ function fetchTagList() {
             <div>Failed to fetch tags</div>
           </div>
         `;
+        console.log(err)
         reject(err);
       });
   });
@@ -273,31 +226,37 @@ function updateTagList() {
       <div>No match found</div>
     </div>
     `;
+    inputsParent.classList.add("show-dropdown");
     return;
   }
   let html = "";
-  filterList.map((item) => (html += `<p class="tagListItem">${item}</p>`));
+  filterList.map(
+    (item) => (html += `<p class="tagListItem dropdown-item">${item}</p>`)
+  );
 
   tagListDropdown.innerHTML = html;
   isRepoRegChanged = false;
   document
-    .querySelectorAll(".artifactInputForm .tagListDropdown p")
+    .querySelectorAll(".inputs .dropdown > div > p")
     ?.forEach((tagElement) =>
       tagElement.addEventListener("click", () => {
         tag.value = tagElement.innerHTML;
-        tagListDropdown.classList.remove("show");
-        tagListDropdown.classList.add("hide");
+        changeDelimiter(":");
+        resizeInputs();
         updateTagList();
+        inputsParent.classList.remove("show-dropdown");
       })
     );
+  inputsParent.classList.add("show-dropdown");
   resetItemIndex();
 }
 
 function fetchRepoList() {
-  if (reg.value !== "mcr.microsoft.com") return;
   return new Promise((resolve, reject) => {
-    repoDropdown.innerHTML =
+    tagListDropdown.innerHTML =
       '<div class="skeletonLoader"></div> <div class="skeletonLoader"></div><div class="skeletonLoader"></div>';
+
+    inputsParent.classList.add("show-dropdown");
     const URL = `/api/repos?registry=${reg.value}`;
     fetch(URL)
       .then((res) => res.json())
@@ -307,7 +266,7 @@ function fetchRepoList() {
         resolve();
       })
       .catch((err) => {
-        repoDropdown.innerHTML = `
+        tagListDropdown.innerHTML = `
           <div class="error">
             <img src="./static/images/crossIcon.svg"/>
             <div>Failed to fetch repositories</div>
@@ -320,10 +279,11 @@ function fetchRepoList() {
 
 function updateRepoList() {
   if (reg.value !== "mcr.microsoft.com") return;
+  inputsParent.classList.add("show-dropdown");
 
   const filterList = repoList.filter((item) => item.includes(repo.value || ""));
   if (!filterList.length) {
-    repoDropdown.innerHTML = `
+    tagListDropdown.innerHTML = `
     <div class="info">
       <img src="./static/images/infoIcon.svg"/>
       <div>No match found</div>
@@ -332,17 +292,22 @@ function updateRepoList() {
     return;
   }
   let html = "";
-  filterList.map((item) => (html += `<p class="repoListItem">${item}</p>`));
+  filterList.map(
+    (item) => (html += `<p class="repoListItem dropdown-item">${item}</p>`)
+  );
 
-  repoDropdown.innerHTML = html;
+  tagListDropdown.innerHTML = html;
   document
-    .querySelectorAll(".artifactInputForm .repoDropdown p")
+    .querySelectorAll(".inputs .dropdown > div > p")
     ?.forEach((repoElement) =>
       repoElement.addEventListener("click", () => {
+        if (repo.value !== repoElement.innerHTML) {
+          tag.value = "";
+        }
         repo.value = repoElement.innerHTML;
-        repoDropdown.classList.remove("show");
-        repoDropdown.classList.add("hide");
+        resizeInputs();
         updateRepoList();
+        inputsParent.classList.remove("show-dropdown");
       })
     );
   resetItemIndex();
@@ -350,8 +315,6 @@ function updateRepoList() {
 
 function listTags() {
   if (!repo.value || !reg.value) return;
-  tagListDropdown.classList.remove("hide");
-  tagListDropdown.classList.add("show");
   if (!tagList.length || isRepoRegChanged) {
     fetchTagList();
   } else {
@@ -361,8 +324,6 @@ function listTags() {
 
 function listRepos() {
   if (!reg.value || reg.value !== "mcr.microsoft.com") return;
-  repoDropdown.classList.remove("hide");
-  repoDropdown.classList.add("show");
   if (!repoList.length) {
     fetchRepoList();
   } else {
@@ -370,8 +331,22 @@ function listRepos() {
   }
 }
 
-repo.addEventListener("change", () => (isRepoRegChanged = true));
-reg.addEventListener("change", () => (isRepoRegChanged = true));
+repo.addEventListener("change", () => {
+  isRepoRegChanged = true;
+});
+reg.addEventListener("change", () => {
+  isRepoRegChanged = true;
+});
+tag.addEventListener("change", () => {
+  if(!tag.value) changeDelimiter("");
+})
+tag.addEventListener("input", () => {
+  if(tag.value.includes("sha256:")) {
+    changeDelimiter("@");
+  } else {
+    changeDelimiter(":");
+  }
+})
 // ends
 
 // copyText
@@ -440,7 +415,7 @@ function alterRightSide(contentId) {
 // referrer Tree
 const lightArr = ["lightgreen", "lightblue", "lightorange"];
 function generateTree(treeData, ct) {
-  if (!treeData.length) return "";
+  if  (!treeData.length) return "";
   let html = "";
   treeData.forEach((node, ind) => {
     const children = generateTree(node.nodes, ct + 1);
@@ -512,8 +487,12 @@ function downloadManifest() {
   dwnBtn.textContent = "DOWNLOAD";
 }
 
-function redirectByDigest(URL) {
-  window.open(URL, "_blank");
+function redirectByDigest(URL, ind) {
+  if (ind === 0) {
+    window.location.href = URL;
+  } else if (ind === 1) {
+    window.open(URL, "_blank");
+  }
 }
 
 function addHyperlinks() {
@@ -528,10 +507,13 @@ function addHyperlinks() {
     const mediaType = mediaTypeSpan
       ? mediaTypeSpan.textContent.trim().replace(/"/g, "")
       : "";
+
     const redirectURL = `/redirect?mediatype=${encodeURIComponent(
       mediaType
     )}&image=${reg.value}/${repo.value}@${match.replace(/"/g, "")}`;
-    return `<span id="jsonDigest" onclick="redirectByDigest('${redirectURL}')">${match}</span>`;
+    return `<span id="jsonDigest" onclick="redirectByDigest('${redirectURL}', ${
+      mediaType.includes("manifest") ? 0 : 1
+    })">${match}</span>`;
   });
   jsonContent.innerHTML = updatedHtmlContent;
 }
@@ -664,7 +646,9 @@ function generateTable(tableData) {
           <div id="digest">
             <a href="${tableData.isBlob ? "/blob?layer=" : "/artifact?image="}${
       reg.value
-    }/${repo.value}@${item.digest}" target="_blank">
+    }/${repo.value}@${item.digest}" ${
+      tableData.isBlob ? 'target="_blank"' : ""
+    }>
               ${item.digest}
             </a>
           </div>
@@ -699,9 +683,7 @@ class RightSideBlock {
   }
 
   prepareMetaData() {
-    let inp = document.querySelectorAll(
-      "#content_area .metaData1 .text .textContent p"
-    );
+    let inp = document.querySelectorAll("#content_area .metaData1 .text .textContent p");
     let copyIcons = document.querySelectorAll(
       "#content_area .metaData1 #copyIcon"
     );
@@ -892,6 +874,172 @@ class RightSideBlock {
 let rsb = new RightSideBlock();
 // ends
 
+// single input form js
+const inputs = document.querySelectorAll(".inputs input");
+const dropdown = document.querySelector(".dropdown");
+const span2 = document.querySelector(".tagSpan");
+
+function updateDropdownPosition(input) {
+  currentActiveInput = input;
+  resetItemIndex();
+  if (
+    (input.classList.contains("i2") && reg.value !== "mcr.microsoft.com") ||
+    (input.classList.contains("i3") && (!reg.value || !repo.value))
+  ) {
+    hideDropdown();
+    return;
+  }
+  const inputLeftOffset = input.offsetLeft;
+  dropdown.style.left = inputLeftOffset + "px";
+}
+function changeDelimiter(symb) {
+  span2.textContent = symb;
+}
+function resizeInputs() {
+  inputs.forEach(function (input) {
+    if (input.classList.contains("i1")) {
+      input.style.width = "75px";
+    } else if (input.classList.contains("i2")) {
+      input.style.width = "95px";
+    }
+    input.style.width = `${
+      Math.min(input.scrollWidth, input.parentElement.offsetWidth * 0.5) + 2
+    }px`;
+  });
+}
+inputs.forEach((input, index) => {
+  input.addEventListener("paste", function handlePastedString(event) {
+    const pastedText = event.clipboardData.getData("text/plain");
+    const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
+    const matches = pastedText.match(regex);
+
+    if (matches) {
+      const registry = matches[1] || "";
+      const repository = matches[2] || "";
+      let tagOrDigest = matches[3] || matches[5] || "";
+
+      if (!matches[3] && !matches[5]) tagOrDigest = "latest";
+      span2.textContent = ":";
+      if (!matches[3]) {
+        span2.textContent = "@";
+      } else if (!matches[5]) {
+        span2.textContent = ":";
+      }
+
+      inputs[0].value = registry;
+      inputs[1].value = repository;
+      inputs[2].value = tagOrDigest;
+    } else {
+      if (currentActiveInput.classList.contains("i1")) inputs[0].value = pastedText;
+      else if (currentActiveInput.classList.contains("i2")) inputs[1].value = pastedText;
+      else inputs[2].value = pastedText;
+    }
+    resizeInputs();
+    hideDropdown();
+    event.preventDefault();
+  });
+
+  input.addEventListener("focus", function (event) {
+    currentActiveInput = event.target;
+    if (event.target.classList.contains("i1")) {
+      showRegList();
+    } else if (event.target.classList.contains("i2")) {
+      if (reg.value !== "mcr.microsoft.com") {
+        hideDropdown();
+        return;
+      }
+      listRepos();
+    } else if (event.target.classList.contains("i3")) {
+      if (!reg.value || !repo.value) {
+        hideDropdown();
+        return;
+      }
+      listTags();
+    }
+    updateDropdownPosition(this);
+  });
+
+  input.addEventListener("keydown", function (event) {
+    if (event.key === "Tab") {
+      event.preventDefault();
+      updateDropdownPosition(this);
+      if (index === 0) {
+        inputs[1].focus();
+      } else if (index === 1) {
+        inputs[2].focus();
+      }
+    }
+  });
+
+  input.addEventListener("input", function () {
+    resizeInputs();
+    if (input.classList.contains("i2")) {
+      const nextSpan = input.nextElementSibling;
+      const thirdInput = input.nextElementSibling.nextElementSibling;
+      const inputValue = input.value;
+
+      if (inputValue.endsWith(":")) {
+        nextSpan.textContent = ":";
+        input.value = inputValue.slice(0, -1);
+        thirdInput.placeholder = "tag";
+        thirdInput.focus();
+      } else if (inputValue.endsWith("@")) {
+        nextSpan.textContent = "@";
+        input.value = inputValue.slice(0, -1);
+        thirdInput.placeholder = "digest";
+        thirdInput.focus();
+      }
+    }
+  });
+
+  input.addEventListener("keydown", function (event) {
+    if (event.key === "/" && index === 0) {
+      event.preventDefault();
+      inputs[1].focus();
+    } else if (
+      event.key === "Backspace" &&
+      (input.value === "" || input.selectionStart === 0)
+    ) {
+      event.preventDefault();
+      if (index === 2) {
+        inputs[1].focus();
+      } else if (index === 1) {
+        inputs[0].focus();
+      }
+    }
+  });
+
+  input.addEventListener("keydown", function (event) {
+    if (event.key === "ArrowLeft" && input.selectionStart === 0) {
+      event.preventDefault();
+      if (index > 0) {
+        inputs[index - 1].focus();
+      }
+    } else if (
+      event.key === "ArrowRight" &&
+      input.selectionEnd === input.value.length
+    ) {
+      event.preventDefault();
+      if (index < 2) {
+        inputs[index + 1].focus();
+      }
+    } else if (input.classList.contains("i3") && input.selectionStart === 0) {
+      const preSpan = input.previousElementSibling;
+      if (event.key === ":") {
+        event.preventDefault();
+        preSpan.textContent = ":";
+        input.placeholder = "tag";
+      } else if (event.key === "@") {
+        event.preventDefault();
+        preSpan.textContent = "@";
+        input.placeholder = "digest";
+      }
+    }
+  });
+});
+
+// ends
+
 // artifact contents javascript
 class Artifact {
   constructor() {
@@ -973,54 +1121,61 @@ let ar = new Artifact();
 
 // others
 document.addEventListener("click", (event) => {
-  const isOutsideTagList =
-    tagListDropdown.contains(event.target) ||
-    tag.contains(event.target) ||
-    event.target.classList.contains("tagListItem");
-
-  const isOutsideRegList =
-    regDropdown.contains(event.target) ||
-    reg.contains(event.target) ||
-    event.target.classList.contains("regListItem");
-
-  const isOutsideRepoList =
-    repoDropdown.contains(event.target) ||
-    repo.contains(event.target) ||
-    event.target.classList.contains("repoListItem");
-
-  if (!isOutsideRegList) {
-    regDropdown.classList.remove("show");
-    regDropdown.classList.add("hide");
-  }
-  if (!isOutsideTagList) {
-    tagListDropdown.classList.remove("show");
-    tagListDropdown.classList.add("hide");
-  }
-  if (!isOutsideRepoList) {
-    repoDropdown.classList.remove("show");
-    repoDropdown.classList.add("hide");
+  const allowedClasses = [
+    "i1",
+    "i2",
+    "i3",
+    "dropdown",
+    "repoListItem",
+    "tagListItem",
+    "items",
+  ];
+  let isHide = true;
+  allowedClasses.forEach((className) => {
+    if (event.target.classList.contains(className)) {
+      isHide = false;
+    }
+  });
+  if (isHide) {
+    inputsParent.classList.remove("show-dropdown");
   }
 });
 
+function updateInputs(image) {
+  const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
+  const matches = image.match(regex);
+
+  const registry = matches[1] || "";
+  const repository = matches[2] || "";
+  let tagOrDigest = matches[3] || matches[5] || "";
+
+  if (!matches[3] && !matches[5]) {
+    tagOrDigest = "latest";
+    changeDelimiter(":");
+  } else if (!matches[3]) {
+    changeDelimiter("@");
+  } else if (!matches[5]) {
+    changeDelimiter(":");
+  }
+
+  reg.value = registry;
+  repo.value = repository;
+  tag.value = tagOrDigest;
+}
 function handleNavigation() {
   const pathname = window.location.pathname;
   const searchParams = new URLSearchParams(window.location.search);
   const image = searchParams.get("image");
 
   if (pathname.includes("/artifact") && image) {
-    const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
-    const matches = image.match(regex);
-
-    reg.value = matches[1];
-    repo.value = matches[2];
-    tag.value = matches[3];
+    updateInputs(image);
+    resizeInputs();
 
     artifact.classList.remove("hide");
     artifact.classList.add("show");
 
     rsb.isManifestPrepared = false;
     try {
-      fetchTagList();
       displayArtifactContents();
     } catch (error) {
       console.error(error);
@@ -1037,19 +1192,14 @@ document.addEventListener("DOMContentLoaded", async function () {
   const image = new URLSearchParams(window.location.search).get("image");
 
   if (!pathname.substring(pathname.lastIndexOf("/") + 1) || !image) return;
-  const regex = /^(.+?)\/(.+?)(?::|@)(.+)$/;
-  const matches = image.match(regex);
-
-  reg.value = `${matches[1]}`;
-  repo.value = matches[2];
-  tag.value = matches[3];
-
+  updateInputs(image);
+  resizeInputs();
   artifact.classList.remove("hide");
   artifact.classList.add("show");
 
   rsb.isManifestPrepared = false;
   try {
-    await fetchTagList();
+    // await fetchTagList();
     await displayArtifactContents();
   } catch (error) {
     console.error(error);
