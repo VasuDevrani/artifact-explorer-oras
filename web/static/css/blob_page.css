@@ -96,9 +96,9 @@ body {
   margin: auto;
 }
 .blobContent {
-  max-width: 1400px;
-  min-width: 600px;
+  max-width: 1200px;
   max-height: 60vh;
+  width: 60%;
   overflow: auto;
   border: 1px solid var(--secondary-color-light);
   padding: 10px;
