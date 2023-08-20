@@ -141,9 +141,7 @@
             ? data.ContentType
             : "not available";
           copyIcons[2].setAttribute("data-value", data.ContentType || "");
-          ins[3].textContent = data.ContentLength
-            ? data.ContentLength
-            : "not available";
+          ins[3].textContent = data.ContentLength !== null ? data.ContentLength : "not available";
           copyIcons[3].setAttribute("data-value", data.ContentLength || "");
 
 
