@@ -112,8 +112,8 @@ func GenerateReferrerTreeConcurrent(repo *remote.Repository, name string, artifa
 				}
 
 				mu.Lock()
+				defer mu.Unlock()
 				result = append(result, res)
-				mu.Unlock()
 			}(referrer)
 		}
 		return nil
