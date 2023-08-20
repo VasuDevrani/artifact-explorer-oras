@@ -7,37 +7,37 @@ import (
 )
 
 type Server struct {
-	port string
-	staticPath string
+	port         string
+	staticPath   string
 	templatePath string
-	
-	app *fiber.App
-	htmlEngine *html.Engine
+	app          *fiber.App
 }
 
-func Init(port string, staticPath string, templatePath string) Server{
-	var s Server
+func Init(port, staticPath, templatePath string) *Server {
 	engine := html.New(staticPath, templatePath)
-
 	app := fiber.New(fiber.Config{
-        Views: engine,
-    })
+		Views: engine,
+	})
 
 	app.Static("/static", "../web/static")
 
-	s.port = port
-	s.staticPath = staticPath
-	s.templatePath = templatePath
-	s.app = app
+	app.Use(cors.New())
+
+	s := &Server{
+		port:         port,
+		staticPath:   staticPath,
+		templatePath: templatePath,
+		app:          app,
+	}
+	s.configureRoutes()
 
 	return s
 }
 
-func (s *Server) Run() error{
-	app := s.app
-	app.Use(cors.New())
+func (s *Server) Run() error {
+	return s.app.Listen(":" + s.port)
+}
 
-	AppRouter(app)
-
-    return app.Listen(":3000")
+func (s *Server) configureRoutes() {
+	AppRouter(s.app)
 }
