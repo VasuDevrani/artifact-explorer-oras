@@ -440,7 +440,7 @@ function alterRightSide(contentId) {
 // referrer Tree
 const lightArr = ["lightgreen", "lightblue", "lightorange"];
 function generateTree(treeData, ct) {
-  if(!treeData.length) return "";
+  if (!treeData.length) return "";
   let html = "";
   treeData.forEach((node, ind) => {
     const children = generateTree(node.nodes, ct + 1);
@@ -580,6 +580,81 @@ function generateTable(tableData) {
     ? tableData.data
     : [tableData.data];
 
+  if (tableData.title === "Annotations") {
+    data.forEach((item) => {
+      for (const key in item) {
+        if (item.hasOwnProperty(key)) {
+          const value = item[key];
+          records += `
+          <tr>
+            <td>${key}</td>
+            <td>${value}</td>
+          </tr>`;
+        }
+      }
+    });
+
+    const table = `
+    <div id="table">
+      <table class="ui fixed unstackable celled table">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        ${records}
+      </table>
+    </div>`;
+
+    return table;
+  }
+
+  if (tableData.title === "Manifests") {
+    data.forEach((item) => {
+      records += `
+        <tr>
+          <td colspan="3" id="mediaType">${item.mediaType}</td>
+          <td>${item.size}</td>
+          <td colspan="3" id="digest">
+            <div id="digest">
+              <a href="${
+                tableData.isBlob ? "/blob?layer=" : "/artifact?image="
+              }${reg.value}/${repo.value}@${item.digest}" target="_blank">
+                ${item.digest}
+              </a>
+            </div>
+            <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${
+              item.digest
+            }">
+          </td>
+          <td>${item.platform.architecture}</td>
+          <td>${item.platform.os}</td>
+        </tr>`;
+    });
+
+    const table = `
+      <div id="table">
+        <table class="ui fixed unstackable celled table">
+          <thead>
+            <tr>
+              <th colspan="3" rowspan="2">Mediatype</th>
+              <th rowspan="2">Size</th>
+              <th colspan="3" rowspan="2">Digest</th>
+              <th colspan="2">Platform</th>
+            </tr>
+            <tr>
+              <th>Architecture</th>
+              <th>OS</th>
+            </tr>
+          </thead>
+          ${records}
+        </table>
+      </div>`;
+
+    return table;
+  }
+
   data.forEach((item) => {
     records += `
       <tr>
@@ -602,12 +677,12 @@ function generateTable(tableData) {
 
   const table = `
     <div id="table">
-      <table class="ui fixed unstackable single line celled table">
+      <table class="ui fixed unstackable celled table">
         <thead>
           <tr>
-            <th scope="col" colspan="4">Mediatype</th>
-            <th scope="col">Size</th>
-            <th scope="col" colspan="3">Digest</th>
+            <th colspan="4">Mediatype</th>
+            <th>Size</th>
+            <th colspan="3">Digest</th>
           </tr>
         </thead>
         ${records}
@@ -624,24 +699,27 @@ class RightSideBlock {
   }
 
   prepareMetaData() {
-    let inp = document.querySelectorAll("#content_area .metaData1 .text .textContent p");
+    let inp = document.querySelectorAll(
+      "#content_area .metaData1 .text .textContent p"
+    );
     let copyIcons = document.querySelectorAll(
       "#content_area .metaData1 #copyIcon"
     );
     const fields = [
       { key: "Artifact", index: 0 },
       { key: "Digest", index: 1 },
-      { key: "MediaType", index: 2 }
+      { key: "MediaType", index: 2 },
+      { key: "Size", index: 3 },
     ];
 
+    console.log(ar);
     fields.forEach((field) => {
       const value = ar[field.key] || "not available";
       inp[field.index].textContent = value;
       copyIcons[field.index].setAttribute("data-value", value);
     });
 
-    const r = regList.find(item => item.name === ar.Artifact.split('/')[0]);
-    console.log(r)
+    const r = regList.find((item) => item.name === ar.Artifact.split("/")[0]);
     document.querySelector(".metaData1 .registry img").src = r.image;
     document.querySelector(".metaData1 .registry p").textContent = r.name;
   }
@@ -686,20 +764,21 @@ class RightSideBlock {
 
       const sections = [
         { title: "Manifests", data: ar.Manifests, isBlob: false },
-        { title: "Layers", data: ar.Layers, isBlob: true },
         { title: "Config", data: ar.Configs, isBlob: true },
+        { title: "Layers", data: ar.Layers, isBlob: true },
         {
           title: "Subject",
           data: ar.Subject.digest ? ar.Subject : null,
           isBlob: false,
         },
+        { title: "Annotations", data: ar.Annotations, isBlob: false },
       ];
 
       let tableView = sections
         .filter((section) => section.data)
         .map(
           (section) => `
-              <h1>${section.title}</h1>
+              <h2>${section.title}</h2>
               ${generateTable(section)}
           `
         )
@@ -824,7 +903,9 @@ class Artifact {
     this.Layers = null;
     this.Subject = null;
     this.Referrers = null;
+    this.Annotations = null;
     this.Manifest = null;
+    this.Size = null;
   }
 
   async setContents(artifact) {
@@ -846,7 +927,9 @@ class Artifact {
       this.Layers = data.Layers;
       this.Digest = data.Digest;
       this.Subject = data.Subject;
-      this.Manifest = data.Manifest;
+      this.Manifest = JSON.parse(data.Manifest);
+      this.Size = data.Size;
+      this.Annotations = data.Annotations;
 
       return null;
     } catch (err) {
@@ -858,6 +941,8 @@ class Artifact {
       this.Layers = null;
       this.Subject = null;
       this.Manifest = null;
+      this.Size = null;
+      this.Annotations = null;
       return err;
     }
   }

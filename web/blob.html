@@ -131,19 +131,19 @@
 
           ins[0].textContent = data.Artifact
             ? data.Artifact
-            : "<p>not available</p>";
+            : "not available";
           copyIcons[0].setAttribute("data-value", data.Artifact || "");
           ins[1].textContent = data.Digest
             ? data.Digest
-            : "<p>not available</p>";
+            : "not available";
           copyIcons[1].setAttribute("data-value", data.Digest || "");
           ins[2].textContent = data.ContentType
             ? data.ContentType
-            : "<p>not available</p>";
+            : "not available";
           copyIcons[2].setAttribute("data-value", data.ContentType || "");
           ins[3].textContent = data.ContentLength
             ? data.ContentLength
-            : "<p>not available</p>";
+            : "not available";
           copyIcons[3].setAttribute("data-value", data.ContentLength || "");
 
 
@@ -151,10 +151,15 @@
           document.querySelector(".registry p").textContent = matches[1];
           loader.classList.add("hide");
           document.querySelector(".content").classList.remove("hide");
+          
+          if(!data.Data) {
+            blobContent.innerHTML = "";
+            blobContent.classList.add("hide")
+            return;
+          }
           if (
             data.ContentLength > 120000 ||
-            (Array.isArray(data.Data) && !data.Data.length) ||
-            !Object.keys(data.Data).length
+            (Array.isArray(data.Data) && !data.Data.length) 
           ) {
             blobContent.innerHTML = `
             <div class="error">
@@ -170,6 +175,7 @@
             </pre>
             `;
         } catch (err) {
+          console.log(err)
           blobContent.innerHTML = `
             <div class="error">
             <img src="./static/images/crossIcon.svg"/>

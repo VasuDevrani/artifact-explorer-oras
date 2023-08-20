@@ -31,6 +31,7 @@ type ArtifactContent struct {
 	Manifests    interface{}
 	Configs      interface{}
 	Layers       interface{}
+	Annotations  interface{}
 }
 
 type Artifact struct {
@@ -170,20 +171,23 @@ func PullManifest(a Artifact) (ArtifactContent, ErrorResponse) {
 	}
 
 	result := ArtifactContent{
-		Artifact:     a.Name,
-		Manifest:     data,
-		Manifests:    data["manifests"],
-		Configs:      data["config"],
-		Layers:       data["layers"],
-		Digest:       string(descriptor.Digest),
-		MediaType:    string(descriptor.MediaType),
-		Size:         int64(descriptor.Size),
+		Artifact:    a.Name,
+		Manifest:    jsonData,
+		Manifests:   data["manifests"],
+		Configs:     data["config"],
+		Layers:      data["layers"],
+		Annotations: data["annotations"],
+		Digest:      string(descriptor.Digest),
+		MediaType:   string(descriptor.MediaType),
+		Size:        int64(descriptor.Size),
 	}
 
 	if descriptor.ArtifactType != "" {
 		result.ArtifactType = descriptor.ArtifactType
-	} else if configMediaType, ok := data["config"].(map[string]interface{})["mediaType"].(string); ok {
-		result.ArtifactType = configMediaType
+	} else if configData, ok := data["config"].(map[string]interface{}); ok {
+		if configMediaType, ok := configData["mediaType"].(string); ok {
+			result.ArtifactType = configMediaType
+		}
 	}
 
 	if subjectData, ok := data["subject"].(map[string]interface{}); ok {
