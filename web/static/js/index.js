@@ -337,6 +337,16 @@ repo.addEventListener("change", () => {
 reg.addEventListener("change", () => {
   isRepoRegChanged = true;
 });
+tag.addEventListener("change", () => {
+  if(!tag.value) changeDelimiter("");
+})
+tag.addEventListener("input", () => {
+  if(tag.value.includes("sha256:")) {
+    changeDelimiter("@");
+  } else {
+    changeDelimiter(":");
+  }
+})
 // ends
 
 // copyText
