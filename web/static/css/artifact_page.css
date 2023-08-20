@@ -500,7 +500,7 @@ td, tr, th {
 .dropdown {
   position: absolute;
   width: 400px;
-  height: 245px;
+  height: 250px;
   display: none;
   top: 125%;
   background-color: white;

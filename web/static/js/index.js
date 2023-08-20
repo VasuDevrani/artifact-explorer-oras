@@ -871,7 +871,6 @@ const span2 = document.querySelector(".tagSpan");
 
 function updateDropdownPosition(input) {
   currentActiveInput = input;
-  console.log(input)
   resetItemIndex();
   if (
     (input.classList.contains("i2") && reg.value !== "mcr.microsoft.com") ||
@@ -899,7 +898,7 @@ function resizeInputs() {
   });
 }
 inputs.forEach((input, index) => {
-  input.addEventListener("paste", function handlePastedString(event, id) {
+  input.addEventListener("paste", function handlePastedString(event) {
     const pastedText = event.clipboardData.getData("text/plain");
     const regex = /^(.+?)\/(.+?)(?::([^@]+))?(@(.+))?$/;
     const matches = pastedText.match(regex);
@@ -921,15 +920,17 @@ inputs.forEach((input, index) => {
       inputs[1].value = repository;
       inputs[2].value = tagOrDigest;
     } else {
-      if (id === "1") inputs[0].value = pastedText;
-      else if (id === "2") inputs[1].value = pastedText;
+      if (currentActiveInput.classList.contains("i1")) inputs[0].value = pastedText;
+      else if (currentActiveInput.classList.contains("i2")) inputs[1].value = pastedText;
       else inputs[2].value = pastedText;
     }
     resizeInputs();
+    hideDropdown();
     event.preventDefault();
   });
 
   input.addEventListener("focus", function (event) {
+    currentActiveInput = event.target;
     if (event.target.classList.contains("i1")) {
       showRegList();
     } else if (event.target.classList.contains("i2")) {

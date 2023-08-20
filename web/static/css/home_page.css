@@ -30,7 +30,7 @@
   margin-top: -5px;
 }
 .form {
-  width: 60vw;
+  width: 50vw;
   max-width: 1400px;
   transform: translateY(-40%);
   background-color: #fff;
@@ -258,7 +258,7 @@
 .dropdown {
   position: absolute;
   width: 400px;
-  height: 245px;
+  height: 250px;
   display: none;
   top: 125%;
   background-color: white;
