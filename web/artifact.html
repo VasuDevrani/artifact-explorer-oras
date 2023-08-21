@@ -26,7 +26,14 @@
               <img src="" alt="" />
               <p></p>
             </div>
-            <button onclick="downloadManifest()">Download</button>
+            <button
+              type="button"
+              id="manifestDownload"
+              data-bs-toggle="modal"
+              data-bs-target="#exampleModal"
+            >
+              Download
+            </button>
           </div>
           <div class="text">
             <div class="textContent">
@@ -84,6 +91,43 @@
             </div>
             <div id="manifestBlock" class="contentBlock active"></div>
             <div id="referrerBlock" class="contentBlock"></div>
+          </div>
+        </div>
+      </div>
+      <div
+        class="modal fade"
+        id="exampleModal"
+        tabindex="-1"
+        aria-labelledby="modalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="modalLabel">
+                Enter file name
+              </h1>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              ></button>
+            </div>
+            <div class="modal-body">
+              <input type="text" placeholder="manifest.json" id="manifestFileName"/>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                data-bs-dismiss="modal"
+                class="btn btn-primary"
+                id="dwnBtn"
+                onclick="downloadManifest()"
+              >
+                Download
+              </button>
+            </div>
           </div>
         </div>
       </div>

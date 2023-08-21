@@ -202,7 +202,9 @@
 #manifestBlock table tr #digest:hover #copyIcon {
   visibility: visible;
 }
-td, tr, th {
+td,
+tr,
+th {
   word-break: break-all;
 }
 #referrerBlock .info,

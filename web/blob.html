@@ -15,7 +15,9 @@
               <img src="" alt="" />
               <p></p>
             </div>
-            <button onclick="downloadBlob()">Download</button>
+            <button data-bs-toggle="modal" data-bs-target="#exampleModal">
+              Download
+            </button>
           </div>
           <div class="text">
             <div class="textLabel color1">Full Reference:</div>
@@ -47,6 +49,47 @@
           </div>
         </div>
         <div class="blobContent"></div>
+        <div
+          class="modal fade"
+          id="exampleModal"
+          tabindex="-1"
+          aria-labelledby="modalLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="modalLabel">
+                  Enter file name
+                </h1>
+                <button
+                  type="button"
+                  class="btn-close"
+                  id="modalClose"
+                  data-bs-dismiss="modal"
+                  aria-label="Close"
+                ></button>
+              </div>
+              <div class="modal-body">
+                <p id="downloadErrorInfo" class="hide"></p>
+                <input
+                  type="text"
+                  id="blobFileName"
+                />
+              </div>
+              <div class="modal-footer">
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  id="dwnBtn"
+                  onclick="downloadBlob()"
+                >
+                  Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
     {{template "footer"}}
@@ -57,7 +100,6 @@
         ".content .metaData .text .textContent p"
       );
       const loader = document.querySelector(".spinner");
-      const downloadBtn = document.querySelector(".buttonGroup > button");
       const copyIcons = document.querySelectorAll("#copyIcon");
 
       let artifactParams = null;
@@ -71,6 +113,16 @@
 
       function downloadBlob() {
         const apiURL = `/api/blob?registry=${artifactParams[1]}/&name=${artifactParams[2]}&digest=${artifactParams[3]}&type=download`;
+        const fileInput = document.querySelector("#blobFileName");
+        const downloadBtn = document.querySelector("#dwnBtn");
+        const errorInfo = document.querySelector("#downloadErrorInfo");
+        const modalCloseBtn = document.getElementById("modalClose");
+
+        errorInfo.style.color = "crimson";
+        errorInfo.style.fontSize = "15px";
+
+        let fileName = fileInput.value ? fileInput.value : "file";
+        fileInput.value = "";
 
         downloadBtn.textContent = "loading...";
         fetch(apiURL)
@@ -78,12 +130,12 @@
             const contentDisposition = response.headers.get(
               "Content-Disposition"
             );
-            let filename = "file";
             if (
               contentDisposition &&
               contentDisposition.indexOf("filename=") !== -1
             ) {
-              filename = contentDisposition.split("filename=")[1].trim();
+              const cd = contentDisposition.split("filename=")[1].trim();
+              fileName = fileName + "." + cd.split(".")[1];
             }
 
             return response.blob().then((blob) => {
@@ -95,12 +147,21 @@
               downloadLink.click();
 
               document.body.removeChild(downloadLink);
+              modalCloseBtn.click();
             });
           })
           .catch((error) => {
-            console.error("Error while fetching the file:", error);
+            errorInfo.classList.add("show");
+            errorInfo.classList.remove("hide");
+            errorInfo.textContent = `Download failed: ${error.message}`;
+            setTimeout(() => {
+              errorInfo.classList.add("hide");
+              errorInfo.classList.remove("show");
+            }, 2000);
           })
-          .finally(() => (downloadBtn.textContent = "Download"));
+          .finally(() => {
+            downloadBtn.textContent = "Download";
+          });
       }
       async function blobData(URL) {
         try {
@@ -129,35 +190,31 @@
             `/api/blob?registry=${matches[1]}/&name=${matches[2]}&digest=${matches[3]}`
           );
 
-          ins[0].textContent = data.Artifact
-            ? data.Artifact
-            : "not available";
+          ins[0].textContent = data.Artifact ? data.Artifact : "not available";
           copyIcons[0].setAttribute("data-value", data.Artifact || "");
-          ins[1].textContent = data.Digest
-            ? data.Digest
-            : "not available";
+          ins[1].textContent = data.Digest ? data.Digest : "not available";
           copyIcons[1].setAttribute("data-value", data.Digest || "");
           ins[2].textContent = data.ContentType
             ? data.ContentType
             : "not available";
           copyIcons[2].setAttribute("data-value", data.ContentType || "");
-          ins[3].textContent = data.ContentLength !== null ? data.ContentLength : "not available";
+          ins[3].textContent =
+            data.ContentLength !== null ? data.ContentLength : "not available";
           copyIcons[3].setAttribute("data-value", data.ContentLength || "");
-
 
           document.querySelector(".registry img").src = regSrc[matches[1]];
           document.querySelector(".registry p").textContent = matches[1];
           loader.classList.add("hide");
           document.querySelector(".content").classList.remove("hide");
-          
-          if(!data.Data) {
+
+          if (!data.Data) {
             blobContent.innerHTML = "";
-            blobContent.classList.add("hide")
+            blobContent.classList.add("hide");
             return;
           }
           if (
             data.ContentLength > 120000 ||
-            (Array.isArray(data.Data) && !data.Data.length) 
+            (Array.isArray(data.Data) && !data.Data.length)
           ) {
             blobContent.innerHTML = `
             <div class="error">
@@ -173,7 +230,7 @@
             </pre>
             `;
         } catch (err) {
-          console.log(err)
+          console.log(err);
           blobContent.innerHTML = `
             <div class="error">
             <img src="./static/images/crossIcon.svg"/>
