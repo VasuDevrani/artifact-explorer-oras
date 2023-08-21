@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/opencontainers/go-digest"
@@ -86,31 +87,43 @@ func ArtifactFromQuery(q Query) Artifact {
 	return a
 }
 
-func GenerateReferrerTree(repo *remote.Repository, name string, artifact string) ([]Referrer, error) {
+func GenerateReferrerTreeConcurrent(repo *remote.Repository, name string, artifact string) ([]Referrer, error) {
 	ctx := context.Background()
 
 	descriptor, err := oras.Resolve(ctx, repo, name, oras.DefaultResolveOptions)
-
 	if err != nil {
 		return nil, err
 	}
 
+	var wg sync.WaitGroup
+	var mu sync.Mutex
 	result := []Referrer{}
+
 	if err := repo.Referrers(ctx, descriptor, "", func(referrers []v1.Descriptor) error {
 		for _, referrer := range referrers {
-			nodes, _ := GenerateReferrerTree(repo, artifact+ATSYMBOL+string(referrer.Digest), artifact)
-			res := Referrer{
-				Ref:   referrer,
-				Nodes: nodes,
-			}
+			wg.Add(1)
+			go func(ref v1.Descriptor) {
+				defer wg.Done()
 
-			result = append(result, res)
+				// FIXME: handle error
+				nodes, _ := GenerateReferrerTreeConcurrent(repo, artifact+ATSYMBOL+string(ref.Digest), artifact)
+				res := Referrer{
+					Ref:   ref,
+					Nodes: nodes,
+				}
+
+				mu.Lock()
+				defer mu.Unlock()
+				result = append(result, res)
+			}(referrer)
 		}
 		return nil
 	}); err != nil {
 		return nil, err
 	}
-	return result, err
+
+	wg.Wait()
+	return result, nil
 }
 
 func Err(errorMessage string, statusCode int) ErrorResponse {

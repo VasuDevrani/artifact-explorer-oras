@@ -75,7 +75,7 @@ func Referrers() fiber.Handler {
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
 
-		referrers, err := GenerateReferrerTree(repo, a.Name, artifact)
+		referrers, err := GenerateReferrerTreeConcurrent(repo, a.Name, artifact)
 
 		if err != nil {
 			errResponse := Err("Failed to fetch referrers", fiber.StatusNotFound)
