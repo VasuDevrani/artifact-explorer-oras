@@ -105,6 +105,7 @@ func GenerateReferrerTreeConcurrent(repo *remote.Repository, name string, artifa
 			go func(ref v1.Descriptor) {
 				defer wg.Done()
 
+				// FIXME: handle error
 				nodes, _ := GenerateReferrerTreeConcurrent(repo, artifact+ATSYMBOL+string(ref.Digest), artifact)
 				res := Referrer{
 					Ref:   ref,
