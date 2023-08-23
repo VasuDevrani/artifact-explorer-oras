@@ -43,6 +43,9 @@ a {
   text-decoration: none;
   color: var(--primary-color-light);
 }
+.icon {
+  cursor: pointer;
+}
 button {
   border: none;
   border-radius: 10px;
@@ -277,4 +280,8 @@ nav #logo {
 .modal #dwnBtn {
   background-color: var(--primary-color-light);
   font-weight: 500;
+}
+
+.modal .modalBtn {
+  margin-top: 20px;
 }

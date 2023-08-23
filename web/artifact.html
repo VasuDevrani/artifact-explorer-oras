@@ -29,8 +29,7 @@
             <button
               type="button"
               id="manifestDownload"
-              data-bs-toggle="modal"
-              data-bs-target="#exampleModal"
+              onclick="openDownloadModal({type: 'manifest'})"
             >
               Download
             </button>
@@ -104,30 +103,16 @@
         <div class="modal-dialog">
           <div class="modal-content">
             <div class="modal-header">
-              <h1 class="modal-title fs-5" id="modalLabel">
-                Enter file name
-              </h1>
+              <h1 class="modal-title fs-5" id="modalLabel">Enter file name</h1>
               <button
                 type="button"
                 class="btn-close"
                 data-bs-dismiss="modal"
                 aria-label="Close"
+                id="modalClose"
               ></button>
             </div>
-            <div class="modal-body">
-              <input type="text" placeholder="manifest.json" id="manifestFileName"/>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                data-bs-dismiss="modal"
-                class="btn btn-primary"
-                id="dwnBtn"
-                onclick="downloadManifest()"
-              >
-                Download
-              </button>
-            </div>
+            <div class="modal-body"></div>
           </div>
         </div>
       </div>
