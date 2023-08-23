@@ -470,12 +470,9 @@ function switchView(contentId, elementId, headClass) {
 }
 // ends
 
-const dwnModal = new bootstrap.Modal(document.getElementById("exampleModal"));
-const dwnModalBody = document.querySelector(".modal-body");
-const modalCloseBtn = document.getElementById("modalClose");
-
 function downloadManifest() {
   const fileInput = document.querySelector("#fileName");
+  const modalCloseBtn = document.getElementById("modalClose");
   const fileName = fileInput.value;
   fileInput.value = "";
 
@@ -503,6 +500,7 @@ function downloadLayer(digest) {
   const fileInput = document.querySelector("#fileName");
   const errorInfo = document.querySelector("#downloadErrorInfo");
   const downloadBtn = document.querySelector("#dwnBtn");
+  const modalCloseBtn = document.getElementById("modalClose");
 
   errorInfo.style.color = "crimson";
   errorInfo.style.fontSize = "15px";
@@ -550,6 +548,9 @@ function downloadLayer(digest) {
 }
 
 function openDownloadModal(data) {
+  const dwnModal = new bootstrap.Modal(document.getElementById("exampleModal"));
+  const dwnModalBody = document.querySelector(".modal-body");
+
   const { type, digest, title } = data;
 
   dwnModalBody.innerHTML = `
