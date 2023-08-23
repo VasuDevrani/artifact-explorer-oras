@@ -557,7 +557,13 @@ function openDownloadModal(data) {
     <input
       type="text"
       id="fileName"
-      placeholder=${type === "manifest" ? "manifest.json" : `${title}`}
+      placeholder=${
+        type === "manifest"
+          ? ar.Manifest?.Annotations?.["org.opencontainers.image.ref.name"]
+            ? ar.Manifest?.Annotations?.["org.opencontainers.image.ref.name"]
+            : "manifest.json"
+          : `${title}`
+      }
     />
     <button
       type="button"
