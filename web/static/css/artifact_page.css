@@ -244,6 +244,10 @@ th {
   width: 100%;
 }
 
+#layerDownloadIcon {
+  width: 55px;
+}
+
 #jsonV > pre > span:nth-child(1) {
   display: inline-block;
   margin-left: -107px;

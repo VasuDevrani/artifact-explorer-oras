@@ -122,7 +122,6 @@
         errorInfo.style.fontSize = "15px";
 
         let fileName = fileInput.value ? fileInput.value : "file";
-        fileInput.value = "";
 
         downloadBtn.textContent = "loading...";
         fetch(apiURL)
@@ -141,12 +140,13 @@
             return response.blob().then((blob) => {
               const downloadLink = document.createElement("a");
               downloadLink.href = URL.createObjectURL(blob);
-              downloadLink.download = filename;
+              downloadLink.download = fileName;
 
               document.body.appendChild(downloadLink);
               downloadLink.click();
 
               document.body.removeChild(downloadLink);
+              fileInput.value = "";
               modalCloseBtn.click();
             });
           })

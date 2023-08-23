@@ -468,9 +468,14 @@ function switchView(contentId, elementId, headClass) {
   selectedContent.classList.add("active");
   selectedHead.classList.add("active");
 }
+// ends
+
+const dwnModal = new bootstrap.Modal(document.getElementById("exampleModal"));
+const dwnModalBody = document.querySelector(".modal-body");
+const modalCloseBtn = document.getElementById("modalClose");
 
 function downloadManifest() {
-  const fileInput = document.querySelector("#manifestFileName");
+  const fileInput = document.querySelector("#fileName");
   const fileName = fileInput.value;
   fileInput.value = "";
 
@@ -490,6 +495,90 @@ function downloadManifest() {
   downloadLink.click();
 
   document.body.removeChild(downloadLink);
+  modalCloseBtn.click();
+}
+
+function downloadLayer(digest) {
+  const apiURL = `/api/blob?registry=${reg.value}/&name=${repo.value}&digest=${digest}&type=download`;
+  const fileInput = document.querySelector("#fileName");
+  const errorInfo = document.querySelector("#downloadErrorInfo");
+  const downloadBtn = document.querySelector("#dwnBtn");
+
+  errorInfo.style.color = "crimson";
+  errorInfo.style.fontSize = "15px";
+
+  let fileName = fileInput.value
+    ? fileInput.value
+    : fileInput.getAttribute("placeholder");
+  downloadBtn.textContent = "loading...";
+  fetch(apiURL)
+    .then((response) => {
+      const contentDisposition = response.headers.get("Content-Disposition");
+      if (
+        contentDisposition &&
+        contentDisposition.indexOf("filename=") !== -1
+      ) {
+        const cd = contentDisposition.split("filename=")[1].trim();
+        fileName = fileName + "." + cd.split(".")[1];
+      }
+
+      return response.blob().then((blob) => {
+        const downloadLink = document.createElement("a");
+        downloadLink.href = URL.createObjectURL(blob);
+        downloadLink.download = fileName;
+
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        document.body.removeChild(downloadLink);
+        fileInput.value = "";
+        modalCloseBtn.click();
+      });
+    })
+    .catch((error) => {
+      errorInfo.classList.add("show");
+      errorInfo.classList.remove("hide");
+      errorInfo.textContent = `Download failed: ${error.message}`;
+      setTimeout(() => {
+        errorInfo.classList.add("hide");
+        errorInfo.classList.remove("show");
+      }, 2000);
+    })
+    .finally(() => {
+      downloadBtn.textContent = "Download";
+    });
+}
+
+function openDownloadModal(data) {
+  const { type, digest, title } = data;
+
+  dwnModalBody.innerHTML = `
+    <p id="downloadErrorInfo" class="hide"></p>
+    <input
+      type="text"
+      id="fileName"
+      placeholder=${
+        type === "manifest"
+          ? ar.Manifest?.Annotations?.["org.opencontainers.image.ref.name"]
+            ? ar.Manifest?.Annotations?.["org.opencontainers.image.ref.name"]
+            : "manifest.json"
+          : `${title}`
+      }
+    />
+    <button
+      type="button"
+      class="btn btn-primary modalBtn"
+      id="dwnBtn"
+      onclick=${
+        type === "manifest"
+          ? (onclick = "downloadManifest()")
+          : `downloadLayer('${digest}')`
+      }
+    >
+    Download
+    </button>
+  `;
+  dwnModal.show();
 }
 
 function redirectByDigest(URL, ind) {
@@ -642,6 +731,55 @@ function generateTable(tableData) {
     return table;
   }
 
+  if (tableData.title === "Layers") {
+    data.forEach((item) => {
+      records += `
+        <tr>
+          <td colspan="4" id="mediaType">${item.mediaType}</td>
+          <td>${item.size}</td>
+          <td colspan="3" id="digest">
+            <div id="digest">
+              <a href="${
+                tableData.isBlob ? "/blob?layer=" : "/artifact?image="
+              }${reg.value}/${repo.value}@${item.digest}" ${
+        tableData.isBlob ? 'target="_blank"' : ""
+      }>
+                ${item.digest}
+              </a>
+            </div>
+            <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${
+              item.digest
+            }">
+          </td>
+          <td colspan="1"><img src="./static/images/download.svg" onclick="openDownloadModal({
+            type: 'layer',
+            digest: '${item.digest}',
+            title: '${
+              item?.annotations?.["org.opencontainers.image.title"] || "file"
+            }'
+          })" class="icon"></td>
+        </tr>
+      `;
+    });
+
+    const table = `
+    <div id="table">
+      <table class="ui fixed unstackable celled table">
+        <thead>
+          <tr>
+            <th colspan="4">Mediatype</th>
+            <th>Size</th>
+            <th colspan="3">Digest</th>
+            <th colspan="1" id="layerDownloadIcon"></th>
+          </tr>
+        </thead>
+        ${records}
+      </table>
+    </div>`;
+
+    return table;
+  }
+
   data.forEach((item) => {
     records += `
       <tr>
@@ -701,7 +839,6 @@ class RightSideBlock {
       { key: "Size", index: 3 },
     ];
 
-    console.log(ar);
     fields.forEach((field) => {
       const value = ar[field.key] || "not available";
       inp[field.index].textContent = value;
