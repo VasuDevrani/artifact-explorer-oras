@@ -354,7 +354,9 @@ document.addEventListener("click", (event) => {
   const icon = event.target;
 
   if (icon.id === "copyIcon") {
-    icon.src = "./static/images/tickIcon.svg";
+    icon.src = icon.classList.contains("terminalIcon")
+      ? "./static/images/tickWhite.svg"
+      : "./static/images/tickIcon.svg";
     const dataValue = icon.dataset.value;
 
     const tempTextArea = document.createElement("textarea");
@@ -369,7 +371,9 @@ document.addEventListener("click", (event) => {
 
     document.body.removeChild(tempTextArea);
     setTimeout(() => {
-      icon.src = "./static/images/copyIcon.svg";
+      icon.src = icon.classList.contains("terminalIcon")
+        ? "./static/images/copyIconWhite.svg"
+        : "./static/images/copyIcon.svg";
     }, 500);
   }
 });
@@ -797,7 +801,7 @@ function generateTable(tableData) {
           </div>
           <img src="./static/images/copyIcon.svg" id="copyIcon" data-value="${
             item.digest
-          }">
+          }"/>
         </td>
       </tr>`;
   });
@@ -848,6 +852,15 @@ class RightSideBlock {
     const r = regList.find((item) => item.name === ar.Artifact.split("/")[0]);
     document.querySelector(".metaData1 .registry img").src = r.image;
     document.querySelector(".metaData1 .registry p").textContent = r.name;
+
+    // add terminal command
+    const tempContainer = document.createElement("div");
+    tempContainer.innerHTML = addCliTerminal(
+      `oras manifest get --descriptor ${ar.Artifact}`
+    );
+
+    const terminalElement = tempContainer.firstElementChild;
+    document.querySelector(".metaData1").appendChild(terminalElement);
   }
 
   async prepareManifestBlock() {
@@ -882,6 +895,7 @@ class RightSideBlock {
 
       const JSONview = `
         <div class="view-item active" id="jsonV">
+          ${addCliTerminal(`oras manifest fetch --pretty ${ar.Artifact}`)}
           <pre id="manifestJson">
             ${prettyPrintJson.toHtml(ar.Manifest)}
           </pre>
@@ -984,6 +998,7 @@ class RightSideBlock {
           </a>
         </div>
         </div>
+        ${addCliTerminal(`oras discover -o tree ${ar.Artifact}`)}
         ${treeV}
       </div>
       `;
@@ -1183,7 +1198,20 @@ inputs.forEach((input, index) => {
     }
   });
 });
+// ends
 
+// terminal ui
+function addCliTerminal(command) {
+  const value = command.replace(/\n/g, "<br>");
+  return `
+  <div class="terminal">
+    <div class="prompt">guest@host:~$</div>
+    <div class="command" id="commandOutput">
+    ${value}
+    <img src="./static/images/copyIconWhite.svg" id="copyIcon" data-value="${value}" class="terminalIcon"/>
+    </div>
+  </div>`;
+}
 // ends
 
 // artifact contents javascript
