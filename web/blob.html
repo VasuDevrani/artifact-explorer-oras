@@ -72,10 +72,7 @@
               </div>
               <div class="modal-body">
                 <p id="downloadErrorInfo" class="hide"></p>
-                <input
-                  type="text"
-                  id="blobFileName"
-                />
+                <input type="text" id="blobFileName" />
               </div>
               <div class="modal-footer">
                 <button
@@ -101,6 +98,7 @@
       );
       const loader = document.querySelector(".spinner");
       const copyIcons = document.querySelectorAll("#copyIcon");
+      const fileInput = document.querySelector("#blobFileName");
 
       let artifactParams = null;
       const regSrc = {
@@ -113,7 +111,6 @@
 
       function downloadBlob() {
         const apiURL = `/api/blob?registry=${artifactParams[1]}/&name=${artifactParams[2]}&digest=${artifactParams[3]}&type=download`;
-        const fileInput = document.querySelector("#blobFileName");
         const downloadBtn = document.querySelector("#dwnBtn");
         const errorInfo = document.querySelector("#downloadErrorInfo");
         const modalCloseBtn = document.getElementById("modalClose");
@@ -121,26 +118,16 @@
         errorInfo.style.color = "crimson";
         errorInfo.style.fontSize = "15px";
 
-        let fileName = fileInput.value ? fileInput.value : "file";
+        let fileName = fileInput.value ? fileInput.value : ins[1].textContent;
 
         downloadBtn.textContent = "loading...";
         fetch(apiURL)
           .then((response) => {
-            const contentDisposition = response.headers.get(
-              "Content-Disposition"
-            );
-            if (
-              contentDisposition &&
-              contentDisposition.indexOf("filename=") !== -1
-            ) {
-              const cd = contentDisposition.split("filename=")[1].trim();
-              fileName = fileName + "." + cd.split(".")[1];
-            }
-
             return response.blob().then((blob) => {
               const downloadLink = document.createElement("a");
               downloadLink.href = URL.createObjectURL(blob);
-              downloadLink.download = fileName;
+              let fileNameWithoutExtension = fileName.replace(/\..+$/, "");
+              downloadLink.download = fileNameWithoutExtension;
 
               document.body.appendChild(downloadLink);
               downloadLink.click();
@@ -176,6 +163,7 @@
           return err;
         }
       }
+
       document.addEventListener("DOMContentLoaded", async function () {
         const pathname = window.location.pathname;
         const blob = new URLSearchParams(window.location.search).get("layer");
@@ -206,6 +194,7 @@
           document.querySelector(".registry p").textContent = matches[1];
           loader.classList.add("hide");
           document.querySelector(".content").classList.remove("hide");
+          fileInput.setAttribute("placeholder", ins[1].textContent);
 
           if (!data.Data) {
             blobContent.innerHTML = "";
