@@ -511,18 +511,10 @@ function downloadLayer(digest) {
   downloadBtn.textContent = "loading...";
   fetch(apiURL)
     .then((response) => {
-      const contentDisposition = response.headers.get("Content-Disposition");
-      if (
-        contentDisposition &&
-        contentDisposition.indexOf("filename=") !== -1
-      ) {
-        const cd = contentDisposition.split("filename=")[1].trim();
-        fileName = fileName + "." + cd.split(".")[1];
-      }
-
       return response.blob().then((blob) => {
         const downloadLink = document.createElement("a");
         downloadLink.href = URL.createObjectURL(blob);
+        console.log(fileName)
         downloadLink.download = fileName;
 
         document.body.appendChild(downloadLink);
@@ -551,7 +543,11 @@ function openDownloadModal(data) {
   const dwnModal = new bootstrap.Modal(document.getElementById("exampleModal"));
   const dwnModalBody = document.querySelector(".modal-body");
 
-  const { type, digest, title } = data;
+  let { type, digest, title } = data;
+
+  if(!title && type !== "manifest") {
+    title = digest.replace(':', '-');
+  }
 
   dwnModalBody.innerHTML = `
     <p id="downloadErrorInfo" class="hide"></p>
@@ -756,7 +752,7 @@ function generateTable(tableData) {
             type: 'layer',
             digest: '${item.digest}',
             title: '${
-              item?.annotations?.["org.opencontainers.image.title"] || "file"
+              item?.annotations?.["org.opencontainers.image.title"] || ""
             }'
           })" class="icon"></td>
         </tr>

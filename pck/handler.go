@@ -152,18 +152,18 @@ func BlobContent() fiber.Handler {
 			return c.Status(errResponse.StatusCode).JSON(errResponse)
 		}
 		if t == DOWNLOAD {
-			filename := "file"
-			contentType := ""
+			// filename := "file"
+			// contentType := ""
 
-			if isJSON(pulledBlob) {
-				filename += ".json"
-				contentType = "application/json"
-			} else {
-				filename += ".tar"
-				contentType = "application/x-tar"
-			}
-			c.Set("Content-Type", contentType)
-			c.Set("Content-Disposition", "attachment; filename="+filename)
+			// if isJSON(pulledBlob) {
+			// 	filename += ".json"
+			// 	contentType = "application/json"
+			// } else {
+			// 	filename += ".tar"
+			// 	contentType = "application/x-tar"
+			// }
+			c.Set("Content-Type", "application/octet-stream")
+			// c.Set("Content-Disposition", "attachment; filename="+filename)
 
 			return c.Send(pulledBlob)
 		}

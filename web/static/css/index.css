@@ -280,6 +280,7 @@ nav #logo {
 .modal #dwnBtn {
   background-color: var(--primary-color-light);
   font-weight: 500;
+  width: 100%;
 }
 
 .modal .modalBtn {
