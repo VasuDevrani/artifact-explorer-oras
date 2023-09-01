@@ -16,7 +16,8 @@ async function displayArtifactContents() {
 
     // rsb.isManifestPrepared = false;
     rsb.isReferrersPrepared = false;
-    alterRightSide("manifestBlock");
+    rsb.prepareManifestBlock();
+    rsb.prepareReferrersBlock();
   } catch (error) {
     console.error(error);
   }
@@ -390,28 +391,6 @@ sidebarItems.forEach((item) => {
   });
 });
 
-function alterRightSide(contentId) {
-  const contentBlocks = document.querySelectorAll(
-    "#content_area .main .rightContent .contentBlock"
-  );
-  const selectedContent = document.querySelector(
-    `#content_area .main .rightContent #${contentId}`
-  );
-
-  for (let i = 0; i < contentBlocks.length; i++) {
-    contentBlocks[i].classList.remove("active");
-  }
-  selectedContent.classList.add("active");
-  if (contentId === "manifestBlock" && !rsb.isManifestPrepared) {
-    rsb.prepareManifestBlock();
-  }
-  if (contentId === "referrerBlock" && !rsb.isReferrersPrepared) {
-    if (!reg.value || !repo.value || !tag.value) return;
-    rsb.prepareReferrersBlock();
-  }
-}
-// ends
-
 // referrer Tree
 const lightArr = ["lightgreen", "lightblue", "lightorange"];
 function generateTree(treeData, ct) {
@@ -420,31 +399,37 @@ function generateTree(treeData, ct) {
   treeData.forEach((node, ind) => {
     const children = generateTree(node.nodes, ct + 1);
     html += `
-      <li>
-        <details open ${ct === 0 ? "class='pl-0'" : ""}>
-          <summary ${children === "" ? "class='no-marker'" : ""}> 
-          <div class="summary-content ${lightArr[ct % 3]}">
-          <div>
+    <li>
+    <details open ${ct === 0 ? "class='pl-0'" : ""}>
+      <summary ${children === "" ? "class='no-marker'" : ""}> 
+      <div class="summary-content ${lightArr[ct % 3]}">
+      <div>
+          <div class="text">
+          ${
+            children === "" ? 
+            ` 
+              <img src="./static/images/ellipse.svg" class="no-nodes"/>
+            ` : ""
+          }
           <div class="icon">
-            <img src="./static/images/githubColor.svg">
-          </div>
-              <div class="text">
-              <p>${
-                node.ref.artifactType
-                  ? node.ref.artifactType
-                  : node.ref.mediaType
-              }</p>
-              <p>
-              <a href="/artifact?image=${reg.value}/${repo.value}@${
-      node.ref.digest
-    }" target="_blank">${node.ref.digest}</a></p>
-            </div>
-            </div>
-          </div>
-          </summary> 
-          ${children}
-        </details>
-      </li>
+        <img src="./static/images/githubColor.svg">
+      </div>
+          <p>${
+            node.ref.artifactType
+              ? node.ref.artifactType
+              : node.ref.mediaType
+          }</p>
+        </div>
+        <p class="digest">
+          <a href="/artifact?image=${reg.value}/${repo.value}@${
+  node.ref.digest
+}">${node.ref.digest}</a></p>
+        </div>
+      </div>
+      </summary> 
+      ${children}
+    </details>
+  </li>
     `;
   });
   return `<ul ${ct === 0 ? "class='pl-0'" : ""}>${html}</ul>`;
@@ -942,7 +927,7 @@ class RightSideBlock {
     if (this.isReferrersPrepared) return;
 
     const loader = document.querySelector(
-      "#content_area .main .rightContent .loadingBlock"
+      "#contents .sidebar .loadingBlock"
     );
     const treeView = document.getElementById("referrerBlock");
     treeView.innerHTML = "";
@@ -969,18 +954,11 @@ class RightSideBlock {
         return;
       }
       const treeV = `
-      <div id="treeV" class="view-item active">
+      <div id="treeV">
         ${generateTree(ar.Referrers, 0)}
       </div>`;
       treeView.innerHTML = `
       <div id="referrers">
-        <div class="header">
-        <div class="ui tabular menu">
-          <a class="item active view aa" onclick='switchView("treeV", "referrers", "aa")'>
-            TREE VIEW
-          </a>
-        </div>
-        </div>
         ${treeV}
       </div>
       `;

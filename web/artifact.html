@@ -19,77 +19,71 @@
       </div>
 
       <!-- artifact content section -->
-      <div id="content_area" class="hide">
-        <div class="metaData1">
-          <div class="head">
-            <div class="registry">
-              <img src="" alt="" />
-              <p></p>
-            </div>
-            <button
-              type="button"
-              id="manifestDownload"
-              onclick="openDownloadModal({type: 'manifest'})"
-            >
-              Download
-            </button>
+      <div id="contents">
+        <div class="sidebar">
+          <div class="spinner loadingBlock">
+            <div class="skeletonLoader"></div>
+            <div class="skeletonLoader"></div>
+            <div class="skeletonLoader"></div>
+            <div class="skeletonLoader"></div>
+            <div class="skeletonLoader"></div>
           </div>
-          <div class="text">
-            <div class="textContent">
-              <p class="artifactName">not available</p>
-              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-            </div>
-          </div>
-          <div class="text">
-            <div class="textLabel">Digest:</div>
-            <div class="textContent color2">
-              <p>not available</p>
-              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-            </div>
-          </div>
-          <div class="text">
-            <div class="textLabel">Media Type:</div>
-            <div class="textContent color1">
-              <p>not available</p>
-              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-            </div>
-          </div>
-          <div class="text">
-            <div class="textLabel">Size:</div>
-            <div class="textContent color1">
-              <p>not available</p>
-              <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
-            </div>
-          </div>
+          <div id="referrerBlock"></div>
         </div>
-
-        <div class="main">
-          <div class="leftSideBar">
-            <ul>
-              <li
-                class="active show"
-                onclick="alterRightSide('manifestBlock')"
-                id="manifestSidebarItem"
+        <div id="content_area" class="hide">
+          <div class="metaData1">
+            <div class="head">
+              <div class="registry">
+                <img src="" alt="" />
+                <p></p>
+              </div>
+              <button
+                type="button"
+                id="manifestDownload"
+                onclick="openDownloadModal({type: 'manifest'})"
               >
-                Contents
-              </li>
-              <li
-                id="referrerSidebarItem"
-                onclick="alterRightSide('referrerBlock')"
-              >
-                Referrers
-              </li>
-            </ul>
-          </div>
-          <div class="rightContent">
-            <div class="spinner loadingBlock">
-              <div class="skeletonLoader"></div>
-              <div class="skeletonLoader"></div>
-              <div class="skeletonLoader"></div>
-              <div class="skeletonLoader"></div>
+                Download
+              </button>
             </div>
-            <div id="manifestBlock" class="contentBlock active"></div>
-            <div id="referrerBlock" class="contentBlock"></div>
+            <div class="text">
+              <div class="textContent">
+                <p class="artifactName">not available</p>
+                <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+              </div>
+            </div>
+            <div class="text">
+              <div class="textLabel">Digest:</div>
+              <div class="textContent color2">
+                <p>not available</p>
+                <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+              </div>
+            </div>
+            <div class="text">
+              <div class="textLabel">Media Type:</div>
+              <div class="textContent color1">
+                <p>not available</p>
+                <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+              </div>
+            </div>
+            <div class="text">
+              <div class="textLabel">Size:</div>
+              <div class="textContent color1">
+                <p>not available</p>
+                <img src="./static/images/copyIcon.svg" alt="" id="copyIcon" />
+              </div>
+            </div>
+          </div>
+
+          <div class="main">
+            <div class="rightContent">
+              <div class="spinner loadingBlock">
+                <div class="skeletonLoader"></div>
+                <div class="skeletonLoader"></div>
+                <div class="skeletonLoader"></div>
+                <div class="skeletonLoader"></div>
+              </div>
+              <div id="manifestBlock" class="contentBlock active"></div>
+            </div>
           </div>
         </div>
       </div>
